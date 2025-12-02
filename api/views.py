@@ -17,6 +17,7 @@ from .serializers import (
     CourseSerializer, UserCourseSerializer, MatchResultSerializer,
     ChatSessionSerializer, ChatMessageSerializer
 )
+from .permissions import IsCompanyOrReadOnly, IsCandidateOrCompanyOwner
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -38,7 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsCompanyOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['job_type', 'work_mode', 'is_active', 'location']
     
@@ -48,12 +49,21 @@ class JobViewSet(viewsets.ModelViewSet):
             queryset = Job.objects.filter(company=self.request.user)
         return queryset
     
+    def create(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_company():
+            return Response({'error': 'Apenas empresas podem criar vagas'}, 
+                          status=status.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
+    
     def perform_create(self, serializer):
         serializer.save(company=self.request.user)
     
     @action(detail=True, methods=['get'])
     def candidates(self, request, pk=None):
         job = self.get_object()
+        if job.company != request.user and not request.user.is_admin_user():
+            return Response({'error': 'Acesso nao autorizado'}, 
+                          status=status.HTTP_403_FORBIDDEN)
         applications = job.applications.all()
         serializer = ApplicationSerializer(applications, many=True)
         return Response(serializer.data)
@@ -62,7 +72,7 @@ class JobViewSet(viewsets.ModelViewSet):
 class ApplicationViewSet(viewsets.ModelViewSet):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCandidateOrCompanyOwner]
     
     def get_queryset(self):
         user = self.request.user
@@ -72,10 +82,23 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             return Application.objects.filter(job__company=user)
         return Application.objects.all()
     
+    def create(self, request, *args, **kwargs):
+        if not request.user.is_candidate():
+            return Response({'error': 'Apenas candidatos podem se candidatar'}, 
+                          status=status.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
+    
     def perform_create(self, serializer):
         job = serializer.validated_data['job']
         score = calculate_match_score(self.request.user, job)
         serializer.save(candidate=self.request.user, match_score=score)
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user.is_candidate():
+            return Response({'error': 'Apenas empresas podem atualizar candidaturas'}, 
+                          status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
 
 
 class CourseViewSet(viewsets.ModelViewSet):
