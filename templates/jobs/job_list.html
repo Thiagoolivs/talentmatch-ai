@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Vagas - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Vagas Disponiveis</h1>
+        {% if user.is_authenticated and user.is_company %}
+        <a href="{% url 'jobs:create' %}" class="mt-4 md:mt-0 bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-primary-dark transition">
+            Publicar Vaga
+        </a>
+        {% endif %}
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">Filtros</h2>
+                <form method="get" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Titulo</label>
+                        {{ filter.form.title }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Localizacao</label>
+                        {{ filter.form.location }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Tipo de Vaga</label>
+                        <select name="job_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">Todos</option>
+                            <option value="full_time">Tempo Integral</option>
+                            <option value="part_time">Meio Periodo</option>
+                            <option value="contract">Contrato</option>
+                            <option value="internship">Estagio</option>
+                            <option value="freelance">Freelance</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Modelo</label>
+                        <select name="work_mode" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">Todos</option>
+                            <option value="onsite">Presencial</option>
+                            <option value="remote">Remoto</option>
+                            <option value="hybrid">Hibrido</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg font-bold hover:bg-primary-dark transition">
+                        Filtrar
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="lg:col-span-3">
+            {% if jobs %}
+            <div class="space-y-4">
+                {% for job in jobs %}
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <div class="flex flex-col md:flex-row justify-between items-start">
+                        <div class="flex-grow">
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">
+                                <a href="{% url 'jobs:detail' job.pk %}" class="hover:text-primary">{{ job.title }}</a>
+                            </h2>
+                            <p class="text-primary font-medium mb-2">
+                                {% if job.company.company_profile %}
+                                    {{ job.company.company_profile.company_name }}
+                                {% else %}
+                                    {{ job.company.username }}
+                                {% endif %}
+                            </p>
+                            <p class="text-gray-600 mb-3">{{ job.description|truncatewords:30 }}</p>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="px-3 py-1 bg-blue-100 text-primary text-sm rounded-full">{{ job.get_job_type_display }}</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">{{ job.get_work_mode_display }}</span>
+                                <span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">{{ job.location }}</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 md:mt-0 md:ml-4 text-right">
+                            {% if job.salary_min or job.salary_max %}
+                            <p class="text-lg font-bold text-green-600">
+                                {% if job.salary_min and job.salary_max %}
+                                    R$ {{ job.salary_min|floatformat:0 }} - {{ job.salary_max|floatformat:0 }}
+                                {% elif job.salary_min %}
+                                    A partir de R$ {{ job.salary_min|floatformat:0 }}
+                                {% else %}
+                                    Ate R$ {{ job.salary_max|floatformat:0 }}
+                                {% endif %}
+                            </p>
+                            {% endif %}
+                            <p class="text-gray-500 text-sm">{{ job.created_at|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t flex justify-between items-center">
+                        <span class="text-gray-500 text-sm">{{ job.application_count }} candidatura(s)</span>
+                        <a href="{% url 'jobs:detail' job.pk %}" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition">
+                            Ver Detalhes
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if jobs.has_other_pages %}
+            <div class="mt-8 flex justify-center">
+                <nav class="flex space-x-2">
+                    {% if jobs.has_previous %}
+                    <a href="?page={{ jobs.previous_page_number }}" class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">Anterior</a>
+                    {% endif %}
+                    <span class="px-4 py-2 bg-primary text-white rounded-lg">{{ jobs.number }} de {{ jobs.paginator.num_pages }}</span>
+                    {% if jobs.has_next %}
+                    <a href="?page={{ jobs.next_page_number }}" class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">Proxima</a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="bg-white rounded-lg shadow-md p-8 text-center">
+                <p class="text-gray-600 text-lg">Nenhuma vaga encontrada com os filtros selecionados.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

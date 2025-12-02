@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Ola, {{ user.first_name|default:user.username }}!</h1>
+        <a href="{% url 'accounts:profile' %}" class="text-primary hover:underline">Editar Perfil</a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-primary">{{ applications_count }}</p>
+            <p class="text-gray-600">Candidaturas</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-yellow-600">{{ status_counts.analyzing }}</p>
+            <p class="text-gray-600">Em Analise</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-green-600">{{ status_counts.preselected }}</p>
+            <p class="text-gray-600">Pre-selecionado</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-blue-600">{{ profile_complete }}%</p>
+            <p class="text-gray-600">Perfil Completo</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Candidaturas Recentes</h2>
+                <a href="{% url 'jobs:my_applications' %}" class="text-primary text-sm hover:underline">Ver todas</a>
+            </div>
+            {% if applications %}
+            <div class="space-y-4">
+                {% for app in applications %}
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-800">{{ app.job.title }}</p>
+                        <p class="text-gray-500 text-sm">{{ app.applied_at|date:"d/m/Y" }}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium
+                        {% if app.status == 'submitted' %}bg-blue-100 text-blue-700
+                        {% elif app.status == 'analyzing' %}bg-yellow-100 text-yellow-700
+                        {% elif app.status == 'preselected' %}bg-green-100 text-green-700
+                        {% else %}bg-gray-100 text-gray-700{% endif %}">
+                        {{ app.get_status_display }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">Nenhuma candidatura ainda</p>
+            {% endif %}
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Vagas Recomendadas</h2>
+                <a href="{% url 'match:recommended_jobs' %}" class="text-primary text-sm hover:underline">Ver todas</a>
+            </div>
+            {% if recommended_jobs %}
+            <div class="space-y-4">
+                {% for rec in recommended_jobs %}
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <a href="{% url 'jobs:detail' rec.job.pk %}" class="font-medium text-gray-800 hover:text-primary">{{ rec.job.title }}</a>
+                            <p class="text-gray-500 text-sm">{{ rec.job.location }}</p>
+                        </div>
+                        <span class="px-2 py-1 bg-primary text-white text-sm rounded">{{ rec.score|floatformat:0 }}%</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">Complete seu perfil para ver recomendacoes</p>
+            {% endif %}
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Cursos em Andamento</h2>
+                <a href="{% url 'courses:my_courses' %}" class="text-primary text-sm hover:underline">Ver todos</a>
+            </div>
+            {% if in_progress_courses %}
+            <div class="space-y-4">
+                {% for uc in in_progress_courses %}
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="font-medium text-gray-800">{{ uc.course.title }}</p>
+                        <span class="text-primary font-bold">{{ uc.progress }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-primary h-2 rounded-full" style="width: {{ uc.progress }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">Nenhum curso em andamento</p>
+            {% endif %}
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Cursos Recomendados</h2>
+                <a href="{% url 'courses:recommended' %}" class="text-primary text-sm hover:underline">Ver todos</a>
+            </div>
+            {% if recommended_courses %}
+            <div class="space-y-4">
+                {% for rec in recommended_courses %}
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <a href="{% url 'courses:detail' rec.course.pk %}" class="font-medium text-gray-800 hover:text-primary">{{ rec.course.title }}</a>
+                    <p class="text-green-600 text-sm">Desenvolve: {{ rec.matching_skills|join:", "|truncatewords:5 }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">Complete seu perfil para ver recomendacoes</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if skill_gaps %}
+    <div class="mt-8 bg-yellow-50 rounded-lg p-6">
+        <h3 class="text-lg font-bold text-yellow-800 mb-4">Habilidades em Demanda</h3>
+        <p class="text-yellow-700 mb-4">Desenvolva estas habilidades para aumentar suas chances:</p>
+        <div class="flex flex-wrap gap-2">
+            {% for skill in skill_gaps %}
+            <span class="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm">{{ skill }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Candidatura - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">{{ application.job.title }}</h1>
+                <p class="text-primary font-medium">
+                    {% if application.job.company.company_profile %}
+                        {{ application.job.company.company_profile.company_name }}
+                    {% else %}
+                        {{ application.job.company.username }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="text-center">
+                <p class="text-sm text-gray-600">Match Score</p>
+                <p class="text-3xl font-bold text-primary">{{ application.match_score|floatformat:0 }}%</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <span class="px-4 py-2 rounded-full text-sm font-bold
+                {% if application.status == 'submitted' %}bg-blue-100 text-blue-700
+                {% elif application.status == 'analyzing' %}bg-yellow-100 text-yellow-700
+                {% elif application.status == 'preselected' %}bg-green-100 text-green-700
+                {% elif application.status == 'rejected' %}bg-red-100 text-red-700
+                {% elif application.status == 'hired' %}bg-purple-100 text-purple-700
+                {% endif %}">
+                {{ application.get_status_display }}
+            </span>
+            <span class="text-gray-500">Enviado em {{ application.applied_at|date:"d/m/Y H:i" }}</span>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Candidato</h2>
+            <div class="space-y-3">
+                <p><span class="font-medium">Nome:</span> {{ application.candidate.get_full_name|default:application.candidate.username }}</p>
+                <p><span class="font-medium">Email:</span> {{ application.candidate.email }}</p>
+                {% if application.candidate.candidate_profile %}
+                <p><span class="font-medium">Localizacao:</span> {{ application.candidate.candidate_profile.location|default:"Nao informada" }}</p>
+                <p><span class="font-medium">Habilidades:</span> {{ application.candidate.candidate_profile.skills|default:"Nao informadas" }}</p>
+                {% if application.candidate.candidate_profile.resume %}
+                <p>
+                    <a href="{{ application.candidate.candidate_profile.resume.url }}" target="_blank" class="text-primary hover:underline">
+                        Baixar Curriculo do Perfil
+                    </a>
+                </p>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Carta de Apresentacao</h2>
+            <p class="text-gray-600 whitespace-pre-line">{{ application.cover_letter|default:"Nenhuma carta de apresentacao enviada." }}</p>
+            {% if application.resume %}
+            <p class="mt-4">
+                <a href="{{ application.resume.url }}" target="_blank" class="text-primary hover:underline">
+                    Baixar Curriculo Enviado
+                </a>
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if is_company %}
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Atualizar Status</h2>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Status</label>
+                    {{ form.status }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Notas Internas</label>
+                    {{ form.notes }}
+                </div>
+            </div>
+            <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-primary-dark transition">
+                Atualizar
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

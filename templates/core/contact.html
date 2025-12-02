@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Contato - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-bold text-gray-800 mb-8 text-center">Entre em Contato</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Envie uma Mensagem</h2>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Nome</label>
+                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Seu nome">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Email</label>
+                    <input type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="seu@email.com">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Assunto</label>
+                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option>Duvida Geral</option>
+                        <option>Suporte Tecnico</option>
+                        <option>Parceria</option>
+                        <option>Outro</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Mensagem</label>
+                    <textarea rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Sua mensagem..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-dark transition">
+                    Enviar Mensagem
+                </button>
+            </form>
+        </div>
+        
+        <div class="space-y-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Informacoes de Contato</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="text-gray-600">contato@talentmatch.com</span>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span class="text-gray-600">Sao Paulo, SP - Brasil</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-primary text-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold mb-4">Precisa de Ajuda Rapida?</h3>
+                <p class="opacity-90 mb-4">Nosso assistente de IA pode responder suas duvidas instantaneamente!</p>
+                <a href="{% url 'chatbot:chat' %}" class="inline-block bg-white text-primary px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition">
+                    Falar com IA
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

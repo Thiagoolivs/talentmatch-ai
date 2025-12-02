@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Matching - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Sistema de Matching</h1>
+    
+    {% if user.is_candidate %}
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Vagas Recomendadas</h2>
+            <a href="{% url 'match:recommended_jobs' %}" class="text-primary hover:underline">Ver todas</a>
+        </div>
+        {% if recommendations %}
+        <div class="space-y-4">
+            {% for rec in recommendations %}
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div>
+                    <a href="{% url 'jobs:detail' rec.job.pk %}" class="font-medium text-gray-800 hover:text-primary">{{ rec.job.title }}</a>
+                    <p class="text-gray-500 text-sm">{{ rec.job.location }}</p>
+                </div>
+                <span class="px-3 py-1 bg-primary text-white rounded-full">{{ rec.score|floatformat:0 }}%</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-4">Complete seu perfil para ver recomendacoes</p>
+        {% endif %}
+    </div>
+    
+    {% if skill_gaps %}
+    <div class="bg-yellow-50 rounded-lg p-6">
+        <h3 class="text-lg font-bold text-yellow-800 mb-4">Habilidades em Demanda</h3>
+        <div class="flex flex-wrap gap-2">
+            {% for skill in skill_gaps %}
+            <span class="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm">{{ skill }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+    
+    {% if user.is_company %}
+    <div class="space-y-8">
+        {% for item in job_recommendations %}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">{{ item.job.title }}</h2>
+                <a href="{% url 'match:recommended_candidates' item.job.pk %}" class="text-primary hover:underline">Ver todos</a>
+            </div>
+            {% if item.candidates %}
+            <div class="space-y-3">
+                {% for rec in item.candidates %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-800">{{ rec.candidate.get_full_name|default:rec.candidate.username }}</p>
+                        <p class="text-gray-500 text-sm">{{ rec.candidate.email }}</p>
+                    </div>
+                    <span class="px-3 py-1 bg-primary text-white rounded-full">{{ rec.score|floatformat:0 }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">Nenhum candidato recomendado</p>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="bg-white rounded-lg shadow-md p-8 text-center">
+            <p class="text-gray-600 text-lg mb-4">Publique vagas para receber recomendacoes de candidatos.</p>
+            <a href="{% url 'jobs:create' %}" class="inline-block bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
+                Publicar Vaga
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

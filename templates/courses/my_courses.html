@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus Cursos - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Meus Cursos</h1>
+    
+    {% if in_progress %}
+    <div class="mb-12">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Em Andamento</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for uc in in_progress %}
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">{{ uc.course.title }}</h3>
+                <p class="text-gray-600 text-sm mb-4">{{ uc.course.get_area_display }} | {{ uc.course.duration_hours }}h</p>
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Progresso</span>
+                        <span class="font-bold text-primary">{{ uc.progress }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-primary h-2 rounded-full" style="width: {{ uc.progress }}%"></div>
+                    </div>
+                </div>
+                <a href="{% url 'courses:detail' uc.course.pk %}" class="block text-center bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition">
+                    Continuar
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if completed %}
+    <div>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Concluidos</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for uc in completed %}
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">{{ uc.course.title }}</h3>
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">Concluido</span>
+                </div>
+                <p class="text-gray-600 text-sm mb-2">{{ uc.course.get_area_display }} | {{ uc.course.duration_hours }}h</p>
+                <p class="text-gray-500 text-sm">Concluido em {{ uc.completed_at|date:"d/m/Y" }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if not in_progress and not completed %}
+    <div class="bg-white rounded-lg shadow-md p-8 text-center">
+        <p class="text-gray-600 text-lg mb-4">Voce ainda nao iniciou nenhum curso.</p>
+        <a href="{% url 'courses:list' %}" class="inline-block bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
+            Explorar Cursos
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastrar Empresa - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Criar Conta de Empresa</h1>
+            <p class="text-gray-600 mt-2">Cadastre sua empresa para publicar vagas</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="bg-red-100 text-red-700 p-4 rounded-lg">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Nome da Empresa</label>
+                    {{ form.company_name }}
+                    {% if form.company_name.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.company_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Usuario</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.username.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Senha</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.password1.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Confirmar Senha</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.password2.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-dark transition">
+                    Criar Conta
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">
+                    Ja tem uma conta? 
+                    <a href="{% url 'accounts:login' %}" class="text-primary font-medium hover:underline">Entrar</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
