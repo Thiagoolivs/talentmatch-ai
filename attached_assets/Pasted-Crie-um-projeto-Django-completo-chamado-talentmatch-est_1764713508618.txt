@@ -1,0 +1,308 @@
+Crie um projeto Django completo chamado talentmatch, estruturado para rodar localmente, com front-end responsivo em azul e branco, sistema de vagas, empresas, candidatos, candidaturas, algoritmo de matching, cursos recomendados para deficiências do currículo, chat de IA, dashboards, API REST e interface amigável. Gere toda a estrutura do projeto, todos os apps, todos os arquivos, e deixe tudo pronto para posteriormente fazer deploy.
+
+📌 REQUISITOS DO SISTEMA (IMPLEMENTAR TUDO)
+✔ 1. Estrutura de Apps Django
+
+Crie estes apps:
+
+accounts — login, registro, perfis
+
+jobs — vagas + candidaturas
+
+match — motor de matching
+
+courses — sistema de cursos + recomendações inteligentes
+
+chatbot — chat com IA
+
+dashboard — estatísticas
+
+api — API REST
+
+core — home, layout, navegação
+
+Adicione todos no INSTALLED_APPS.
+
+✔ 2. Banco de Dados
+
+Use SQLite (local).
+
+Crie todas as models completas e conectadas.
+
+✔ 3. Autenticação e Perfis
+
+3 perfis:
+
+candidato
+
+empresa
+
+admin
+
+Cada perfil tem:
+
+dados específicos
+
+avatar
+
+habilidades
+
+currículo (arquivo PDF)
+
+Fluxos:
+
+registros separados
+
+permissões distintas
+
+middleware de rota por tipo de usuário
+
+redirecionamento automático pós-login
+
+✔ 4. Vagas & Candidaturas
+
+Empresa pode:
+
+criar vagas
+
+editar
+
+deletar
+
+ver candidatos
+
+ver recomendações (matching)
+
+Candidato pode:
+
+ver vagas
+
+aplicar
+
+acompanhar status
+
+Status: enviado / analisando / pré-selecionado / rejeitado
+
+Use django-filter para busca.
+
+✔ 5. Sistema de Matching (IA básica)
+
+Usar scikit-learn (TF-IDF):
+
+comparar habilidades do candidato com requisitos da vaga
+
+gerar score (0–1) de similaridade
+
+rankear resultados
+
+Mostrar:
+
+vagas recomendadas ao candidato
+
+candidatos recomendados à empresa
+
+Crie a model MatchResult para guardar histórico.
+
+✔ 6. Chatbot de IA (local)
+
+Criar:
+
+página /chat/
+
+chat funcional com AJAX
+
+IA local simulada (regras de análise de texto)
+
+deve:
+
+avaliar currículo
+
+apontar deficiências
+
+recomendar cursos
+
+sugerir vagas
+
+ajudar na escrita do currículo
+
+Código preparado para futura integração com OpenAI.
+
+🎓 ✔ 7. Sistema de Cursos (NOVO MÓDULO)
+
+Crie o app courses com:
+
+Models:
+
+Course
+
+título
+
+descrição
+
+nível
+
+área
+
+carga horária
+
+URL externa ou interna
+
+imagem
+
+UserCourse
+
+usuário
+
+progresso
+
+status
+
+Funcionalidades:
+
+listar cursos
+
+ver detalhes
+
+iniciar curso
+
+marcar como concluído
+
+salvar progresso
+
+exibir cursos em andamento
+
+✔ Recomendações inteligentes:
+
+analisar CV e perfil
+
+identificar fraquezas (ex.: falta Python → recomendar curso de Python)
+
+integrar com o módulo de matching
+
+mostrar cursos recomendados no dashboard do candidato
+
+✔ 8. Dashboard Completo
+
+Usar Chart.js + Tailwind.
+
+Candidato:
+
+candidaturas enviadas
+
+vagas recomendadas
+
+cursos recomendados
+
+progresso nos cursos
+
+avaliação do currículo
+
+Empresa:
+
+vagas abertas
+
+candidatos por vaga
+
+recomendações
+
+Admin:
+
+visão global do sistema
+
+✔ 9. API REST (DRF)
+
+Criar endpoints:
+
+/api/users/
+
+/api/vagas/
+
+/api/candidaturas/
+
+/api/match/
+
+/api/courses/
+
+/api/chat/
+
+Com Serializers → Viewsets → Router.
+
+✔ 10. Front-end Responsivo
+
+Use Tailwind CSS com as cores principais azul (#005BBB) e branco.
+
+Crie:
+
+base.html com navbar e footer
+
+páginas limpas, modernas e intuitivas
+
+usar azul para:
+
+botões
+
+destaques
+
+links
+
+branco para:
+
+background
+
+cartões
+
+seções de informação
+
+Páginas obrigatórias:
+
+home
+
+login
+
+registro
+
+dashboards
+
+listar vagas
+
+detalhes da vaga
+
+publicar vaga
+
+aplicar
+
+chat de IA
+
+cursos
+
+detalhes do curso
+
+matching
+
+página do perfil
+
+A logo sempre deve voltar para a home.
+
+✔ 11. Configuração para Deploy
+
+Gerar:
+
+requirements.txt completo
+
+settings.py preparado para DEBUG / produção
+
+staticfiles ok
+
+estrutura limpa para deploy futuro (Railway, Render, etc.)
+
+✔ 12. Comandos finais (local)
+
+Deixe o projeto pronto para rodar com:
+
+python manage.py migrate
+python manage.py runserver
+
+📌 INSTRUÇÃO FINAL
+
+Gere TODO o projeto pronto, com TODOS os arquivos, models, views, templates, formulários, urls, APIs, lógica, matching, chatbot, cursos, dashboards, integração front-end, tudo completo e funcionando.
+Não explique — apenas gere o código e a estrutura.
