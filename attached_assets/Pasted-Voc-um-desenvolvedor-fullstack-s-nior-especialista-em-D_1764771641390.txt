@@ -1,0 +1,69 @@
+Você é um desenvolvedor fullstack sênior, especialista em Django, JavaScript e integração de IA. Tenho um projeto chamado talentmatch-ai. Quero que você faça todas essas melhorias e correções, preservando tudo que já funciona:
+
+Banco de dados:
+
+Ajuste e normalize o esquema atual, corrigindo relacionamentos (ForeignKey, ManyToMany, OneToOne).
+
+Crie e aplique migrations sem perder dados existentes.
+
+Corrija campos que possam gerar inconsistências ou erros.
+
+Chat de IA:
+
+Integre a IA Groq ao chat existente.
+
+Garanta respostas assíncronas e exibição correta no frontend.
+
+Adicione histórico de conversas por usuário sem quebrar funcionalidades atuais.
+
+Formulários:
+
+Corrija validações e submissões nos formulários de cadastro de candidatos e empresas.
+
+Garanta que os dados sejam salvos corretamente e que erros sejam exibidos de forma clara.
+
+Sistema de match:
+
+Aperfeiçoe o algoritmo de compatibilidade entre candidatos e vagas, priorizando skills e experiência.
+
+Corrija exibição de matches no frontend.
+
+CSRF:
+
+Corrija falhas de verificação de CSRF em formulários e endpoints AJAX.
+
+Garanta envio e validação correta dos tokens CSRF.
+
+Página de administrador e dashboards:
+
+Crie interface de admin completa.
+
+Inclua dashboards com:
+
+Quantidade de usuários e empresas.
+
+Quantidade de problemas reportados.
+
+Métricas de desempenho do site (acessos, uso do chat, matches).
+
+Adicione verificação/aprovação de empresas cadastradas.
+
+Sistema de gerenciamento de problemas reportados.
+
+Modo manutenção ativável/desativável pelo admin.
+
+Regras gerais:
+
+Não quebrar funcionalidades existentes.
+
+Atualizar models.py, views.py, forms.py, templates e JS conforme necessário.
+
+Gerar migrations corretas.
+
+Incluir comentários explicativos onde houver lógica complexa.
+
+Fornecer instruções claras de teste para cada funcionalidade.
+
+Garantir segurança e boas práticas Django.
+
+Gere todo o código atualizado completo e funcional para integrar ao projeto existente, incluindo instruções de integração passo a passo.

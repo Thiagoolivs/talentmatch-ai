@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportar Problema - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Reportar Problema</h1>
+        
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
+                <select name="category" id="category" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Selecione uma categoria</option>
+                    {% for value, label in categories %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Titulo</label>
+                <input type="text" name="title" id="title" required maxlength="200" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Resumo do problema">
+            </div>
+            
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Descricao</label>
+                <textarea name="description" id="description" required rows="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Descreva o problema em detalhes. Inclua passos para reproduzir, se possivel."></textarea>
+            </div>
+            
+            <div class="flex justify-between items-center pt-4">
+                <a href="{% url 'dashboard:index' %}" class="text-gray-600 hover:text-gray-800">Cancelar</a>
+                <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-dark transition">
+                    Enviar Problema
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

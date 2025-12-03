@@ -8,4 +8,5 @@ urlpatterns = [
     path('send/', views.send_message, name='send'),
     path('new/', views.new_session, name='new_session'),
     path('history/', views.chat_history, name='history'),
+    path('session/<int:session_id>/', views.view_session, name='view_session'),
 ]

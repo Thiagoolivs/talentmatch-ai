@@ -1,10 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Avg
+from django.contrib import messages
+from django.db.models import Count, Avg, Sum
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from datetime import timedelta
 from jobs.models import Job, Application
 from courses.models import Course, UserCourse
-from accounts.models import User, CandidateProfile, CompanyProfile
+from accounts.models import (
+    User, CandidateProfile, CompanyProfile, 
+    ProblemReport, SiteSettings, SiteMetrics
+)
 from match.utils import get_recommended_jobs_for_candidate, get_skill_gaps
+from chatbot.models import ChatSession, ChatMessage
 
 
 @login_required
@@ -100,6 +109,10 @@ def company_dashboard(request):
         'rejected': Application.objects.filter(job__company=user, status='rejected').count(),
     }
     
+    company_verified = False
+    if hasattr(user, 'company_profile'):
+        company_verified = user.company_profile.is_verified()
+    
     return render(request, 'dashboard/company.html', {
         'total_jobs': jobs.count(),
         'active_jobs': active_jobs.count(),
@@ -107,10 +120,16 @@ def company_dashboard(request):
         'jobs_with_stats': jobs_with_stats,
         'recent_applications': recent_applications,
         'status_distribution': status_distribution,
+        'company_verified': company_verified,
     })
 
 
 def admin_dashboard(request):
+    """Dashboard administrativo completo."""
+    if not request.user.is_admin_user():
+        messages.error(request, 'Acesso negado.')
+        return redirect('core:home')
+    
     total_users = User.objects.count()
     total_candidates = User.objects.filter(user_type='candidate').count()
     total_companies = User.objects.filter(user_type='company').count()
@@ -119,9 +138,23 @@ def admin_dashboard(request):
     total_applications = Application.objects.count()
     total_courses = Course.objects.count()
     
+    pending_companies = CompanyProfile.objects.filter(verification_status='pending').count()
+    open_problems = ProblemReport.objects.filter(status__in=['open', 'in_progress']).count()
+    
+    today = timezone.now().date()
+    week_ago = today - timedelta(days=7)
+    
+    new_users_week = User.objects.filter(created_at__date__gte=week_ago).count()
+    new_jobs_week = Job.objects.filter(created_at__date__gte=week_ago).count()
+    new_applications_week = Application.objects.filter(applied_at__date__gte=week_ago).count()
+    
+    chat_messages_count = ChatMessage.objects.count()
+    
     recent_users = User.objects.order_by('-created_at')[:10]
-    recent_jobs = Job.objects.order_by('-created_at')[:10]
-    recent_applications = Application.objects.order_by('-applied_at')[:10]
+    recent_jobs = Job.objects.select_related('company__company_profile').order_by('-created_at')[:10]
+    recent_applications = Application.objects.select_related(
+        'candidate', 'job__company__company_profile'
+    ).order_by('-applied_at')[:10]
     
     applications_by_status = {
         'submitted': Application.objects.filter(status='submitted').count(),
@@ -131,6 +164,15 @@ def admin_dashboard(request):
         'hired': Application.objects.filter(status='hired').count(),
     }
     
+    recent_problems = ProblemReport.objects.select_related('user').order_by('-created_at')[:5]
+    pending_companies_list = CompanyProfile.objects.filter(
+        verification_status='pending'
+    ).select_related('user')[:5]
+    
+    site_settings = SiteSettings.get_settings()
+    
+    metrics_7_days = SiteMetrics.objects.filter(date__gte=week_ago).order_by('date')
+    
     return render(request, 'dashboard/admin.html', {
         'total_users': total_users,
         'total_candidates': total_candidates,
@@ -139,8 +181,177 @@ def admin_dashboard(request):
         'active_jobs': active_jobs,
         'total_applications': total_applications,
         'total_courses': total_courses,
+        'pending_companies': pending_companies,
+        'open_problems': open_problems,
+        'new_users_week': new_users_week,
+        'new_jobs_week': new_jobs_week,
+        'new_applications_week': new_applications_week,
+        'chat_messages_count': chat_messages_count,
         'recent_users': recent_users,
         'recent_jobs': recent_jobs,
         'recent_applications': recent_applications,
         'applications_by_status': applications_by_status,
+        'recent_problems': recent_problems,
+        'pending_companies_list': pending_companies_list,
+        'site_settings': site_settings,
+        'metrics_7_days': metrics_7_days,
+    })
+
+
+@login_required
+def admin_companies(request):
+    """Gerenciamento de empresas pendentes de verificacao."""
+    if not request.user.is_admin_user():
+        messages.error(request, 'Acesso negado.')
+        return redirect('core:home')
+    
+    status_filter = request.GET.get('status', 'pending')
+    
+    companies = CompanyProfile.objects.select_related('user')
+    if status_filter != 'all':
+        companies = companies.filter(verification_status=status_filter)
+    
+    companies = companies.order_by('-user__created_at')
+    
+    return render(request, 'dashboard/admin_companies.html', {
+        'companies': companies,
+        'status_filter': status_filter,
+    })
+
+
+@login_required
+@require_POST
+def verify_company(request, company_id):
+    """Aprova ou rejeita uma empresa."""
+    if not request.user.is_admin_user():
+        return JsonResponse({'error': 'Acesso negado'}, status=403)
+    
+    company = get_object_or_404(CompanyProfile, id=company_id)
+    action = request.POST.get('action')
+    notes = request.POST.get('notes', '')
+    
+    if action == 'approve':
+        company.verification_status = 'approved'
+        company.verification_date = timezone.now()
+        company.verification_notes = notes
+        company.save()
+        messages.success(request, f'Empresa {company.company_name} aprovada com sucesso.')
+    elif action == 'reject':
+        company.verification_status = 'rejected'
+        company.verification_date = timezone.now()
+        company.verification_notes = notes
+        company.save()
+        messages.warning(request, f'Empresa {company.company_name} foi rejeitada.')
+    
+    return redirect('dashboard:admin_companies')
+
+
+@login_required
+def admin_problems(request):
+    """Gerenciamento de problemas reportados."""
+    if not request.user.is_admin_user():
+        messages.error(request, 'Acesso negado.')
+        return redirect('core:home')
+    
+    status_filter = request.GET.get('status', 'open')
+    category_filter = request.GET.get('category', '')
+    
+    problems = ProblemReport.objects.select_related('user', 'resolved_by')
+    
+    if status_filter != 'all':
+        problems = problems.filter(status=status_filter)
+    if category_filter:
+        problems = problems.filter(category=category_filter)
+    
+    problems = problems.order_by('-created_at')
+    
+    return render(request, 'dashboard/admin_problems.html', {
+        'problems': problems,
+        'status_filter': status_filter,
+        'category_filter': category_filter,
+        'categories': ProblemReport.CATEGORY_CHOICES,
+    })
+
+
+@login_required
+@require_POST
+def update_problem(request, problem_id):
+    """Atualiza status de um problema."""
+    if not request.user.is_admin_user():
+        return JsonResponse({'error': 'Acesso negado'}, status=403)
+    
+    problem = get_object_or_404(ProblemReport, id=problem_id)
+    new_status = request.POST.get('status')
+    notes = request.POST.get('notes', '')
+    
+    if new_status in dict(ProblemReport.STATUS_CHOICES):
+        problem.status = new_status
+        problem.admin_notes = notes
+        
+        if new_status in ['resolved', 'closed']:
+            problem.resolved_at = timezone.now()
+            problem.resolved_by = request.user
+        
+        problem.save()
+        messages.success(request, 'Problema atualizado com sucesso.')
+    
+    return redirect('dashboard:admin_problems')
+
+
+@login_required
+@require_POST
+def toggle_maintenance(request):
+    """Ativa/desativa modo de manutencao."""
+    if not request.user.is_admin_user():
+        return JsonResponse({'error': 'Acesso negado'}, status=403)
+    
+    settings = SiteSettings.get_settings()
+    settings.maintenance_mode = not settings.maintenance_mode
+    settings.updated_by = request.user
+    
+    if settings.maintenance_mode:
+        message = request.POST.get('message', '')
+        if message:
+            settings.maintenance_message = message
+    
+    settings.save()
+    
+    status = 'ativado' if settings.maintenance_mode else 'desativado'
+    messages.success(request, f'Modo de manutencao {status}.')
+    
+    return redirect('dashboard:index')
+
+
+@login_required
+def report_problem(request):
+    """Pagina para reportar um problema."""
+    if request.method == 'POST':
+        category = request.POST.get('category')
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        
+        if category and title and description:
+            ProblemReport.objects.create(
+                user=request.user,
+                category=category,
+                title=title,
+                description=description
+            )
+            messages.success(request, 'Problema reportado com sucesso. Nossa equipe ira analisar.')
+            return redirect('dashboard:index')
+        else:
+            messages.error(request, 'Preencha todos os campos.')
+    
+    return render(request, 'dashboard/report_problem.html', {
+        'categories': ProblemReport.CATEGORY_CHOICES,
+    })
+
+
+@login_required
+def my_problems(request):
+    """Lista problemas reportados pelo usuario."""
+    problems = ProblemReport.objects.filter(user=request.user).order_by('-created_at')
+    
+    return render(request, 'dashboard/my_problems.html', {
+        'problems': problems,
     })

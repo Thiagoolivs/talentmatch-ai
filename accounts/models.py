@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -28,8 +29,9 @@ class User(AbstractUser):
 class CandidateProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='candidate_profile')
     bio = models.TextField(blank=True)
-    skills = models.TextField(help_text='Separe as habilidades por vírgula', blank=True)
+    skills = models.TextField(help_text='Separe as habilidades por virgula', blank=True)
     experience = models.TextField(blank=True)
+    experience_years = models.PositiveIntegerField(default=0, help_text='Anos de experiencia')
     education = models.TextField(blank=True)
     resume = models.FileField(upload_to='resumes/', blank=True, null=True)
     linkedin_url = models.URLField(blank=True)
@@ -50,11 +52,17 @@ class CandidateProfile(models.Model):
 
 class CompanyProfile(models.Model):
     COMPANY_SIZE_CHOICES = (
-        ('1-10', '1-10 funcionários'),
-        ('11-50', '11-50 funcionários'),
-        ('51-200', '51-200 funcionários'),
-        ('201-500', '201-500 funcionários'),
-        ('500+', 'Mais de 500 funcionários'),
+        ('1-10', '1-10 funcionarios'),
+        ('11-50', '11-50 funcionarios'),
+        ('51-200', '51-200 funcionarios'),
+        ('201-500', '201-500 funcionarios'),
+        ('500+', 'Mais de 500 funcionarios'),
+    )
+    
+    VERIFICATION_STATUS_CHOICES = (
+        ('pending', 'Pendente'),
+        ('approved', 'Aprovada'),
+        ('rejected', 'Rejeitada'),
     )
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='company_profile')
@@ -66,6 +74,129 @@ class CompanyProfile(models.Model):
     size = models.CharField(max_length=20, choices=COMPANY_SIZE_CHOICES, blank=True)
     founded_year = models.PositiveIntegerField(blank=True, null=True)
     logo = models.ImageField(upload_to='company_logos/', blank=True, null=True)
+    cnpj = models.CharField(max_length=18, blank=True, help_text='CNPJ da empresa')
+    verification_status = models.CharField(
+        max_length=20, 
+        choices=VERIFICATION_STATUS_CHOICES, 
+        default='pending'
+    )
+    verification_date = models.DateTimeField(blank=True, null=True)
+    verification_notes = models.TextField(blank=True, help_text='Notas sobre a verificacao')
     
     def __str__(self):
         return self.company_name
+    
+    def is_verified(self):
+        return self.verification_status == 'approved'
+
+
+class ProblemReport(models.Model):
+    CATEGORY_CHOICES = (
+        ('bug', 'Bug/Erro'),
+        ('feature', 'Sugestao de Funcionalidade'),
+        ('account', 'Problema com Conta'),
+        ('job', 'Problema com Vaga'),
+        ('match', 'Problema com Match'),
+        ('chat', 'Problema com Chat'),
+        ('other', 'Outro'),
+    )
+    
+    STATUS_CHOICES = (
+        ('open', 'Aberto'),
+        ('in_progress', 'Em Andamento'),
+        ('resolved', 'Resolvido'),
+        ('closed', 'Fechado'),
+    )
+    
+    PRIORITY_CHOICES = (
+        ('low', 'Baixa'),
+        ('medium', 'Media'),
+        ('high', 'Alta'),
+        ('critical', 'Critica'),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='problem_reports')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    admin_notes = models.TextField(blank=True, help_text='Notas do administrador')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(blank=True, null=True)
+    resolved_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='resolved_problems'
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.title} - {self.get_status_display()}"
+
+
+class SiteSettings(models.Model):
+    maintenance_mode = models.BooleanField(default=False)
+    maintenance_message = models.TextField(
+        default='O site esta em manutencao. Voltaremos em breve!',
+        blank=True
+    )
+    maintenance_end_time = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    
+    class Meta:
+        verbose_name = 'Configuracoes do Site'
+        verbose_name_plural = 'Configuracoes do Site'
+    
+    def __str__(self):
+        return 'Configuracoes do Site'
+    
+    @classmethod
+    def get_settings(cls):
+        settings, created = cls.objects.get_or_create(pk=1)
+        return settings
+
+
+class SiteMetrics(models.Model):
+    date = models.DateField(unique=True, default=timezone.now)
+    page_views = models.PositiveIntegerField(default=0)
+    unique_visitors = models.PositiveIntegerField(default=0)
+    new_users = models.PositiveIntegerField(default=0)
+    new_companies = models.PositiveIntegerField(default=0)
+    new_jobs = models.PositiveIntegerField(default=0)
+    new_applications = models.PositiveIntegerField(default=0)
+    chat_messages = models.PositiveIntegerField(default=0)
+    matches_created = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['-date']
+        verbose_name = 'Metricas do Site'
+        verbose_name_plural = 'Metricas do Site'
+    
+    def __str__(self):
+        return f"Metricas de {self.date}"
+    
+    @classmethod
+    def get_today(cls):
+        today = timezone.now().date()
+        metrics, created = cls.objects.get_or_create(date=today)
+        return metrics
+    
+    @classmethod
+    def increment(cls, field_name, amount=1):
+        metrics = cls.get_today()
+        current_value = getattr(metrics, field_name, 0)
+        setattr(metrics, field_name, current_value + amount)
+        metrics.save()
+        return metrics
