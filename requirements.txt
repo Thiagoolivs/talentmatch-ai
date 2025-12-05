@@ -31,3 +31,13 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 tzdata==2025.2
 whitenoise==6.11.0
+django
+django-filter
+djangorestframework
+groq
+gunicorn
+numpy
+pandas
+pillow
+scikit-learn
+whitenoise
