@@ -10,7 +10,8 @@ from jobs.models import Job, Application
 from courses.models import Course, UserCourse
 from accounts.models import (
     User, CandidateProfile, CompanyProfile, 
-    ProblemReport, SiteSettings, SiteMetrics
+    ProblemReport, SiteSettings, SiteMetrics,
+    AuditLog, Notification
 )
 from match.utils import get_recommended_jobs_for_candidate, get_skill_gaps
 from chatbot.models import ChatSession, ChatMessage
@@ -232,18 +233,59 @@ def verify_company(request, company_id):
     company = get_object_or_404(CompanyProfile, id=company_id)
     action = request.POST.get('action')
     notes = request.POST.get('notes', '')
+    old_status = company.verification_status
+    
+    ip_address = request.META.get('REMOTE_ADDR')
     
     if action == 'approve':
         company.verification_status = 'approved'
         company.verification_date = timezone.now()
         company.verification_notes = notes
         company.save()
+        
+        AuditLog.log_action(
+            user=request.user,
+            action='approve',
+            model_name='CompanyProfile',
+            object_id=company.id,
+            object_repr=company.company_name,
+            details={'old_status': old_status, 'notes': notes},
+            ip_address=ip_address
+        )
+        
+        Notification.notify_user(
+            user=company.user,
+            notification_type='company_approved',
+            title='Empresa Aprovada!',
+            message=f'Parabens! Sua empresa "{company.company_name}" foi aprovada. Agora voce pode publicar vagas e ver candidaturas.',
+            link='/dashboard/'
+        )
+        
         messages.success(request, f'Empresa {company.company_name} aprovada com sucesso.')
     elif action == 'reject':
         company.verification_status = 'rejected'
         company.verification_date = timezone.now()
         company.verification_notes = notes
         company.save()
+        
+        AuditLog.log_action(
+            user=request.user,
+            action='reject',
+            model_name='CompanyProfile',
+            object_id=company.id,
+            object_repr=company.company_name,
+            details={'old_status': old_status, 'notes': notes},
+            ip_address=ip_address
+        )
+        
+        Notification.notify_user(
+            user=company.user,
+            notification_type='company_rejected',
+            title='Empresa Rejeitada',
+            message=f'Infelizmente sua empresa "{company.company_name}" foi rejeitada. Motivo: {notes or "Nao informado"}',
+            link='/accounts/profile/'
+        )
+        
         messages.warning(request, f'Empresa {company.company_name} foi rejeitada.')
     
     return redirect('dashboard:admin_companies')
@@ -318,6 +360,18 @@ def toggle_maintenance(request):
             settings.maintenance_message = message
     
     settings.save()
+    
+    ip_address = request.META.get('REMOTE_ADDR')
+    action = 'maintenance_on' if settings.maintenance_mode else 'maintenance_off'
+    AuditLog.log_action(
+        user=request.user,
+        action=action,
+        model_name='SiteSettings',
+        object_id=1,
+        object_repr='Modo Manutencao',
+        details={'message': settings.maintenance_message if settings.maintenance_mode else ''},
+        ip_address=ip_address
+    )
     
     status = 'ativado' if settings.maintenance_mode else 'desativado'
     messages.success(request, f'Modo de manutencao {status}.')

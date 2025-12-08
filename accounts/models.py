@@ -223,3 +223,123 @@ class SiteMetrics(models.Model):
         setattr(metrics, field_name, current_value + amount)
         metrics.save()
         return metrics
+
+
+class CanonicalSkill(models.Model):
+    name = models.CharField(max_length=100, unique=True, help_text='Nome canonico da habilidade')
+    aliases = models.TextField(blank=True, help_text='Variacoes conhecidas, separadas por virgula')
+    category = models.CharField(max_length=50, blank=True, help_text='Categoria da habilidade')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Habilidade Canonica'
+        verbose_name_plural = 'Habilidades Canonicas'
+    
+    def __str__(self):
+        return self.name
+    
+    def get_aliases_list(self):
+        if self.aliases:
+            return [a.strip().lower() for a in self.aliases.split(',') if a.strip()]
+        return []
+
+
+class SkillCorrectionLog(models.Model):
+    original_term = models.CharField(max_length=100)
+    corrected_term = models.CharField(max_length=100, blank=True)
+    similarity_score = models.FloatField(default=0.0)
+    was_auto_corrected = models.BooleanField(default=False)
+    needs_review = models.BooleanField(default=False)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Log de Correcao de Habilidade'
+        verbose_name_plural = 'Logs de Correcao de Habilidades'
+    
+    def __str__(self):
+        return f"{self.original_term} -> {self.corrected_term or 'pendente'}"
+
+
+class AuditLog(models.Model):
+    ACTION_CHOICES = (
+        ('create', 'Criacao'),
+        ('update', 'Atualizacao'),
+        ('delete', 'Exclusao'),
+        ('approve', 'Aprovacao'),
+        ('reject', 'Rejeicao'),
+        ('maintenance_on', 'Manutencao Ativada'),
+        ('maintenance_off', 'Manutencao Desativada'),
+        ('login', 'Login'),
+        ('logout', 'Logout'),
+        ('status_change', 'Mudanca de Status'),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='audit_logs')
+    action = models.CharField(max_length=30, choices=ACTION_CHOICES)
+    model_name = models.CharField(max_length=100)
+    object_id = models.CharField(max_length=50, blank=True)
+    object_repr = models.CharField(max_length=255, blank=True)
+    details = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Log de Auditoria'
+        verbose_name_plural = 'Logs de Auditoria'
+    
+    def __str__(self):
+        return f"{self.user} - {self.get_action_display()} - {self.model_name}"
+    
+    @classmethod
+    def log_action(cls, user, action, model_name, object_id='', object_repr='', details=None, ip_address=None):
+        return cls.objects.create(
+            user=user,
+            action=action,
+            model_name=model_name,
+            object_id=str(object_id) if object_id else '',
+            object_repr=object_repr[:255] if object_repr else '',
+            details=details or {},
+            ip_address=ip_address
+        )
+
+
+class Notification(models.Model):
+    TYPE_CHOICES = (
+        ('application_status', 'Status da Candidatura'),
+        ('company_approved', 'Empresa Aprovada'),
+        ('company_rejected', 'Empresa Rejeitada'),
+        ('new_application', 'Nova Candidatura'),
+        ('new_message', 'Nova Mensagem'),
+        ('system', 'Sistema'),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=30, choices=TYPE_CHOICES)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    link = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Notificacao'
+        verbose_name_plural = 'Notificacoes'
+    
+    def __str__(self):
+        return f"{self.title} - {self.user.username}"
+    
+    @classmethod
+    def notify_user(cls, user, notification_type, title, message, link=''):
+        return cls.objects.create(
+            user=user,
+            notification_type=notification_type,
+            title=title,
+            message=message,
+            link=link
+        )

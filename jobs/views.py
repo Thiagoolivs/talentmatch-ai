@@ -45,6 +45,10 @@ def job_create(request):
         messages.error(request, 'Apenas empresas podem criar vagas.')
         return redirect('jobs:list')
     
+    if hasattr(request.user, 'company_profile') and not request.user.company_profile.is_verified():
+        messages.error(request, 'Sua empresa precisa ser aprovada antes de publicar vagas.')
+        return redirect('dashboard:index')
+    
     if request.method == 'POST':
         form = JobForm(request.POST)
         if form.is_valid():
@@ -127,6 +131,11 @@ def my_applications(request):
 @login_required
 def job_applications(request, pk):
     job = get_object_or_404(Job, pk=pk, company=request.user)
+    
+    if hasattr(request.user, 'company_profile') and not request.user.company_profile.is_verified():
+        messages.error(request, 'Sua empresa precisa ser aprovada para visualizar candidaturas.')
+        return redirect('dashboard:index')
+    
     applications = job.applications.select_related('candidate__candidate_profile').order_by('-match_score')
     
     return render(request, 'jobs/job_applications.html', {'job': job, 'applications': applications})
@@ -134,6 +143,9 @@ def job_applications(request, pk):
 
 @login_required
 def application_detail(request, pk):
+    from jobs.models import ApplicationStatusHistory
+    from accounts.models import Notification
+    
     application = get_object_or_404(Application.objects.select_related('job', 'candidate__candidate_profile'), pk=pk)
     
     if application.job.company != request.user and application.candidate != request.user:
@@ -141,16 +153,42 @@ def application_detail(request, pk):
         return redirect('dashboard:index')
     
     if request.method == 'POST' and request.user.is_company():
+        if hasattr(request.user, 'company_profile') and not request.user.company_profile.is_verified():
+            messages.error(request, 'Sua empresa precisa ser aprovada para gerenciar candidaturas.')
+            return redirect('dashboard:index')
+        
+        old_status = application.status
         form = ApplicationStatusForm(request.POST, instance=application)
         if form.is_valid():
-            form.save()
+            application = form.save()
+            
+            if old_status != application.status:
+                ApplicationStatusHistory.objects.create(
+                    application=application,
+                    old_status=old_status,
+                    new_status=application.status,
+                    changed_by=request.user,
+                    notes=application.notes
+                )
+                
+                Notification.notify_user(
+                    user=application.candidate,
+                    notification_type='application_status',
+                    title='Status da candidatura atualizado',
+                    message=f'O status da sua candidatura para "{application.job.title}" foi alterado para "{application.get_status_display()}".',
+                    link=f'/jobs/application/{application.pk}/'
+                )
+            
             messages.success(request, 'Status da candidatura atualizado!')
             return redirect('jobs:application_detail', pk=pk)
     else:
         form = ApplicationStatusForm(instance=application)
     
+    status_history = application.status_history.select_related('changed_by').order_by('-created_at')
+    
     return render(request, 'jobs/application_detail.html', {
         'application': application,
         'form': form,
-        'is_company': request.user.is_company()
+        'is_company': request.user.is_company(),
+        'status_history': status_history
     })

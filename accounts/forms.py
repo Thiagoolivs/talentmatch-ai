@@ -243,6 +243,19 @@ class CandidateProfileForm(forms.ModelForm):
                     raise forms.ValidationError('O arquivo deve ter no maximo 5MB.')
         return resume
     
+    def clean_skills(self):
+        skills = self.cleaned_data.get('skills', '')
+        if skills:
+            try:
+                from accounts.skill_normalizer import normalize_skills_string
+                user = getattr(self.instance, 'user', None)
+                normalized = normalize_skills_string(skills, user)
+                return normalized
+            except Exception as e:
+                logger.warning(f"Error normalizing skills: {e}")
+                return skills
+        return skills
+    
     def save(self, commit=True):
         instance = super().save(commit=False)
         if instance.city and instance.state:

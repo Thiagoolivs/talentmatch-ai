@@ -52,8 +52,10 @@ class Job(models.Model):
 class Application(models.Model):
     STATUS_CHOICES = (
         ('submitted', 'Enviado'),
+        ('viewed', 'Visto'),
         ('analyzing', 'Analisando'),
         ('preselected', 'Pré-selecionado'),
+        ('interview_scheduled', 'Entrevista Agendada'),
         ('rejected', 'Rejeitado'),
         ('hired', 'Contratado'),
     )
@@ -74,3 +76,20 @@ class Application(models.Model):
     
     def __str__(self):
         return f"{self.candidate.username} - {self.job.title}"
+
+
+class ApplicationStatusHistory(models.Model):
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='status_history')
+    old_status = models.CharField(max_length=20, blank=True)
+    new_status = models.CharField(max_length=20)
+    changed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Historico de Status'
+        verbose_name_plural = 'Historicos de Status'
+    
+    def __str__(self):
+        return f"{self.application} - {self.old_status} -> {self.new_status}"

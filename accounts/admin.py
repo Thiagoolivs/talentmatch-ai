@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, CandidateProfile, CompanyProfile, ProblemReport, SiteSettings, SiteMetrics
+from .models import (
+    User, CandidateProfile, CompanyProfile, ProblemReport, SiteSettings, 
+    SiteMetrics, CanonicalSkill, SkillCorrectionLog, AuditLog, Notification
+)
 
 
 class CustomUserAdmin(UserAdmin):
@@ -82,3 +85,41 @@ class SiteMetricsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, CustomUserAdmin)
+
+
+@admin.register(CanonicalSkill)
+class CanonicalSkillAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'is_active', 'created_at')
+    list_filter = ('category', 'is_active')
+    search_fields = ('name', 'aliases')
+    list_editable = ('is_active',)
+
+
+@admin.register(SkillCorrectionLog)
+class SkillCorrectionLogAdmin(admin.ModelAdmin):
+    list_display = ('original_term', 'corrected_term', 'similarity_score', 'was_auto_corrected', 'needs_review', 'created_at')
+    list_filter = ('was_auto_corrected', 'needs_review')
+    search_fields = ('original_term', 'corrected_term')
+    readonly_fields = ('created_at',)
+
+
+@admin.register(AuditLog)
+class AuditLogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'action', 'model_name', 'object_repr', 'created_at', 'ip_address')
+    list_filter = ('action', 'model_name', 'created_at')
+    search_fields = ('user__username', 'object_repr', 'model_name')
+    readonly_fields = ('user', 'action', 'model_name', 'object_id', 'object_repr', 'details', 'ip_address', 'created_at')
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'notification_type', 'title', 'is_read', 'created_at')
+    list_filter = ('notification_type', 'is_read', 'created_at')
+    search_fields = ('user__username', 'title', 'message')
+    list_editable = ('is_read',)
