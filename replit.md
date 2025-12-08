@@ -33,10 +33,11 @@ talentmatch/
 
 ## Technology Stack
 - **Backend**: Django 5.2, Django REST Framework
-- **Database**: SQLite (development), ready for PostgreSQL (production)
+- **Database**: PostgreSQL (Neon-backed via Replit)
 - **AI/ML**: scikit-learn (TF-IDF vectorization), Groq API (LLM chatbot)
 - **Frontend**: Tailwind CSS (CDN), Chart.js for dashboards
 - **Static Files**: WhiteNoise for serving
+- **Database Connector**: dj-database-url, psycopg2-binary
 
 ## Key Features
 1. **Three User Types**: Candidate, Company, Admin with different permissions

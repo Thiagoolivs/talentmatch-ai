@@ -22,8 +22,9 @@ ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
     'https://*.replit.dev',
     'https://*.repl.co',
-    # Adicionando o domínio Railway com HTTPS
     'https://talentmatch-ai-production-cbfe.up.railway.app',
+    'http://localhost:5000',
+    'http://127.0.0.1:5000',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ]
@@ -96,22 +97,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'talentmatch.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-# Substitua TODO o bloco de DATABASES por esta lógica que lê a URL
-
-# Esta é a configuração que o Railway usará
 if 'DATABASE_URL' in os.environ:
-    DATABASES['default'] = dj_database_url.config(
-        conn_max_age=600, 
-        conn_health_checks=True,
-        ssl_require=True # Opcional, mas bom para conexões seguras
-    )
-# Se DATABASE_URL não estiver definida (ou seja, no desenvolvimento local), ele ainda usará SQLite3
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
 else:
     DATABASES = {
         'default': {

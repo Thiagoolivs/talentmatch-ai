@@ -63,3 +63,5 @@ scikit-learn
 whitenoise
 psycopg2-binary
 dj-database-url
+dj-database-url
+psycopg2-binary
