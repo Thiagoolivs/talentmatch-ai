@@ -198,6 +198,11 @@ talentmatch/
 
 ## Configuration Notes
 - ALLOWED_HOSTS set to ['*'] for development
-- CSRF_TRUSTED_ORIGINS includes Replit domains
+- CSRF_TRUSTED_ORIGINS includes Replit domains and localhost
 - Media files stored in /media/
 - Static files collected to /staticfiles/
+
+## Admin Access
+- Primary login: /accounts/login/ with username `administrador` and password `admin123`
+- Alternative access: /accounts/support/ with code `tm2025admin` (configurable via ADMIN_ACCESS_CODE env var)
+- The alternative access link is available as "Suporte Tecnico" at the bottom of the login page
