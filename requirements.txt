@@ -51,3 +51,13 @@ pandas
 pillow
 scikit-learn
 whitenoise
+django
+django-filter
+djangorestframework
+groq
+gunicorn
+numpy
+pandas
+pillow
+scikit-learn
+whitenoise
