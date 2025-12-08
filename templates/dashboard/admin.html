@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Dashboard Administrativo</h1>
+        <div class="flex items-center space-x-4">
+            <form method="post" action="{% url 'dashboard:toggle_maintenance' %}">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 rounded-lg font-medium transition
+                    {% if site_settings.maintenance_mode %}bg-green-600 text-white hover:bg-green-700{% else %}bg-yellow-100 text-yellow-800 hover:bg-yellow-200{% endif %}">
+                    {% if site_settings.maintenance_mode %}Desativar Manutencao{% else %}Ativar Manutencao{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    {% if site_settings.maintenance_mode %}
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-8">
+        <div class="flex">
+            <div class="ml-3">
+                <p class="text-sm text-yellow-700">
+                    <strong>Modo Manutencao Ativo!</strong> Apenas administradores podem acessar o site.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-primary">{{ total_users }}</p>
+            <p class="text-gray-600">Total Usuarios</p>
+            {% if new_users_week > 0 %}
+            <p class="text-sm text-green-600 mt-1">+{{ new_users_week }} esta semana</p>
+            {% endif %}
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-blue-600">{{ total_candidates }}</p>
+            <p class="text-gray-600">Candidatos</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-green-600">{{ total_companies }}</p>
+            <p class="text-gray-600">Empresas</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-yellow-600">{{ active_jobs }}</p>
+            <p class="text-gray-600">Vagas Ativas</p>
+            {% if new_jobs_week > 0 %}
+            <p class="text-sm text-green-600 mt-1">+{{ new_jobs_week }} esta semana</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-2xl font-bold text-purple-600">{{ total_applications }}</p>
+            <p class="text-gray-600">Candidaturas</p>
+            {% if new_applications_week > 0 %}
+            <p class="text-sm text-green-600 mt-1">+{{ new_applications_week }} esta semana</p>
+            {% endif %}
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-2xl font-bold text-indigo-600">{{ chat_messages_count }}</p>
+            <p class="text-gray-600">Mensagens Chat IA</p>
+        </div>
+        <a href="{% url 'dashboard:admin_companies' %}" class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition">
+            <p class="text-2xl font-bold text-orange-600">{{ pending_companies }}</p>
+            <p class="text-gray-600">Empresas Pendentes</p>
+            {% if pending_companies > 0 %}
+            <p class="text-sm text-orange-600 mt-1">Verificar agora</p>
+            {% endif %}
+        </a>
+        <a href="{% url 'dashboard:admin_problems' %}" class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition">
+            <p class="text-2xl font-bold text-red-600">{{ open_problems }}</p>
+            <p class="text-gray-600">Problemas Abertos</p>
+            {% if open_problems > 0 %}
+            <p class="text-sm text-red-600 mt-1">Resolver agora</p>
+            {% endif %}
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Empresas Pendentes</h2>
+                <a href="{% url 'dashboard:admin_companies' %}" class="text-primary hover:text-primary-dark text-sm">Ver todas</a>
+            </div>
+            <div class="space-y-3">
+                {% for company in pending_companies_list %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-800">{{ company.company_name }}</p>
+                        <p class="text-gray-500 text-sm">{{ company.user.email }}</p>
+                    </div>
+                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">Pendente</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">Nenhuma empresa pendente</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Problemas Recentes</h2>
+                <a href="{% url 'dashboard:admin_problems' %}" class="text-primary hover:text-primary-dark text-sm">Ver todos</a>
+            </div>
+            <div class="space-y-3">
+                {% for problem in recent_problems %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-800">{{ problem.title|truncatewords:5 }}</p>
+                        <p class="text-gray-500 text-sm">{{ problem.user.username }} - {{ problem.get_category_display }}</p>
+                    </div>
+                    <span class="px-2 py-1 rounded text-xs
+                        {% if problem.status == 'open' %}bg-yellow-100 text-yellow-800
+                        {% elif problem.status == 'in_progress' %}bg-blue-100 text-blue-800
+                        {% else %}bg-green-100 text-green-800{% endif %}">
+                        {{ problem.get_status_display }}
+                    </span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">Nenhum problema reportado</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Usuarios Recentes</h2>
+            <div class="space-y-3">
+                {% for u in recent_users %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-800">{{ u.username }}</p>
+                        <p class="text-gray-500 text-sm">{{ u.get_user_type_display }}</p>
+                    </div>
+                    <p class="text-gray-400 text-xs">{{ u.created_at|date:"d/m" }}</p>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center">Nenhum usuario</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Vagas Recentes</h2>
+            <div class="space-y-3">
+                {% for job in recent_jobs %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-800">{{ job.title|truncatewords:4 }}</p>
+                        <p class="text-gray-500 text-sm">{{ job.location }}</p>
+                    </div>
+                    <p class="text-gray-400 text-xs">{{ job.created_at|date:"d/m" }}</p>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center">Nenhuma vaga</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Status Candidaturas</h2>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                    <p class="text-blue-700">Novos</p>
+                    <p class="font-bold text-blue-700">{{ applications_by_status.submitted }}</p>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                    <p class="text-yellow-700">Em Analise</p>
+                    <p class="font-bold text-yellow-700">{{ applications_by_status.analyzing }}</p>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <p class="text-green-700">Pre-selecionados</p>
+                    <p class="font-bold text-green-700">{{ applications_by_status.preselected }}</p>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                    <p class="text-red-700">Rejeitados</p>
+                    <p class="font-bold text-red-700">{{ applications_by_status.rejected }}</p>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                    <p class="text-purple-700">Contratados</p>
+                    <p class="font-bold text-purple-700">{{ applications_by_status.hired }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-8 flex space-x-4">
+        <a href="/admin/" class="inline-block bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
+            Acessar Admin Django
+        </a>
+        <a href="{% url 'dashboard:admin_companies' %}" class="inline-block bg-gray-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition">
+            Gerenciar Empresas
+        </a>
+        <a href="{% url 'dashboard:admin_problems' %}" class="inline-block bg-gray-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition">
+            Gerenciar Problemas
+        </a>
+    </div>
+</div>
+{% endblock %}

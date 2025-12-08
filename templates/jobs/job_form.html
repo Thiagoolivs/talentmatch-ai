@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">{{ title }}</h1>
+    
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Informacoes da Vaga</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Titulo da Vaga</label>
+                    {{ form.title }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Descricao</label>
+                    {{ form.description }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Requisitos (separe por virgula)</label>
+                    {{ form.requirements }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Responsabilidades</label>
+                    {{ form.responsibilities }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Beneficios</label>
+                    {{ form.benefits }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Detalhes</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Tipo de Vaga</label>
+                    {{ form.job_type }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Modelo de Trabalho</label>
+                    {{ form.work_mode }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Localizacao</label>
+                    {{ form.location }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Anos de Experiencia</label>
+                    {{ form.experience_years }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Salario Minimo</label>
+                    {{ form.salary_min }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Salario Maximo</label>
+                    {{ form.salary_max }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Data Limite</label>
+                    {{ form.deadline }}
+                </div>
+                <div class="flex items-center mt-6">
+                    {{ form.is_active }}
+                    <label class="ml-2 text-gray-700">Vaga Ativa</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'dashboard:index' %}" class="px-6 py-3 border border-gray-300 rounded-lg font-bold text-gray-700 hover:bg-gray-50 transition">
+                Cancelar
+            </a>
+            <button type="submit" class="bg-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
+                {% if job %}Salvar Alteracoes{% else %}Publicar Vaga{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

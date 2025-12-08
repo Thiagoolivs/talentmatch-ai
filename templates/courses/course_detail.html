@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="h-48 bg-gradient-to-r from-primary to-primary-light flex items-center justify-center">
+            {% if course.image %}
+            <img src="{{ course.image.url }}" alt="{{ course.title }}" class="w-full h-full object-cover">
+            {% else %}
+            <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+            {% endif %}
+        </div>
+        
+        <div class="p-8">
+            <div class="flex flex-wrap gap-3 mb-4">
+                <span class="px-4 py-2 bg-blue-100 text-primary rounded-full">{{ course.get_area_display }}</span>
+                <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full">{{ course.get_level_display }}</span>
+                <span class="px-4 py-2 bg-green-100 text-green-700 rounded-full">{{ course.duration_hours }} horas</span>
+            </div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ course.title }}</h1>
+            
+            {% if course.instructor %}
+            <p class="text-gray-600 mb-4">Instrutor: <span class="font-medium">{{ course.instructor }}</span></p>
+            {% endif %}
+            
+            <div class="mb-6">
+                {% if course.is_free %}
+                <span class="text-2xl font-bold text-green-600">Gratis</span>
+                {% elif course.price %}
+                <span class="text-2xl font-bold text-green-600">R$ {{ course.price|floatformat:2 }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="border-t pt-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Descricao</h2>
+                <p class="text-gray-600 leading-relaxed whitespace-pre-line">{{ course.description }}</p>
+            </div>
+            
+            {% if course.skills_taught %}
+            <div class="border-t pt-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Habilidades que voce vai aprender</h2>
+                <div class="flex flex-wrap gap-2">
+                    {% for skill in course.skills_taught.split %}
+                    <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if lessons %}
+            <div class="border-t pt-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Conteudo do Curso ({{ lessons.count }} aulas)</h2>
+                <div class="space-y-3">
+                    {% for lesson in lessons %}
+                    <div class="border rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                                    {{ forloop.counter }}
+                                </span>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">{{ lesson.title }}</h3>
+                                    {% if lesson.duration_minutes %}
+                                    <span class="text-sm text-gray-500">{{ lesson.duration_minutes }} min</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'courses:lesson_detail' course.pk lesson.pk %}" 
+                               class="text-primary hover:underline text-sm">
+                                Assistir
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+        {% if user.is_authenticated %}
+            {% if user_course %}
+                {% if user_course.status == 'completed' %}
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <p class="text-green-600 font-bold text-lg mb-2">Curso Concluido!</p>
+                    <p class="text-gray-600">Voce concluiu este curso em {{ user_course.completed_at|date:"d/m/Y" }}</p>
+                </div>
+                {% else %}
+                <div class="text-center">
+                    <div class="mb-4">
+                        <p class="text-gray-600 mb-2">Seu progresso</p>
+                        <div class="w-full bg-gray-200 rounded-full h-4">
+                            <div class="bg-primary h-4 rounded-full" style="width: {{ user_course.progress }}%"></div>
+                        </div>
+                        <p class="text-primary font-bold mt-2">{{ user_course.progress }}%</p>
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <form method="post" action="{% url 'courses:update_progress' course.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="progress" value="{{ user_course.progress|add:25 }}">
+                            <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-primary-dark transition">
+                                Avancar 25%
+                            </button>
+                        </form>
+                        <a href="{% url 'courses:complete' course.pk %}" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 transition">
+                            Marcar como Concluido
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+            <div class="text-center">
+                <a href="{% url 'courses:start' course.pk %}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-primary-dark transition">
+                    Iniciar Curso
+                </a>
+            </div>
+            {% endif %}
+        {% else %}
+        <div class="text-center">
+            <p class="text-gray-600 mb-4">Faca login para iniciar este curso</p>
+            <a href="{% url 'accounts:login' %}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-primary-dark transition">
+                Entrar
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

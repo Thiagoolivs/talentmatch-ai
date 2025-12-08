@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TalentMatch{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#005BBB',
+                        'primary-dark': '#004a99',
+                        'primary-light': '#3385cc',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #005BBB 0%, #0073e6 100%);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <nav class="bg-primary shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="{% url 'core:home' %}" class="flex items-center">
+                        <span class="text-white text-2xl font-bold">TalentMatch</span>
+                    </a>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="{% url 'jobs:list' %}" class="text-white hover:text-gray-200 px-3 py-2">Vagas</a>
+                    <a href="{% url 'courses:list' %}" class="text-white hover:text-gray-200 px-3 py-2">Cursos</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'messaging:list' %}" class="text-white hover:text-gray-200 px-3 py-2">Mensagens</a>
+                        <a href="{% url 'chatbot:chat' %}" class="text-white hover:text-gray-200 px-3 py-2">Chat IA</a>
+                        <a href="{% url 'dashboard:index' %}" class="text-white hover:text-gray-200 px-3 py-2">Dashboard</a>
+                        {% if user.is_staff or user.is_admin_user %}
+                        <a href="{% url 'dashboard:index' %}" class="text-yellow-300 hover:text-yellow-100 px-3 py-2 font-semibold">Admin</a>
+                        {% endif %}
+                        <div class="relative group">
+                            <button class="text-white hover:text-gray-200 px-3 py-2 flex items-center">
+                                {{ user.username }}
+                                <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block z-50">
+                                <a href="{% url 'accounts:profile' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Meu Perfil</a>
+                                {% if user.is_candidate %}
+                                    <a href="{% url 'jobs:my_applications' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Minhas Candidaturas</a>
+                                    <a href="{% url 'match:recommended_jobs' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Vagas Recomendadas</a>
+                                {% endif %}
+                                {% if user.is_company %}
+                                    <a href="{% url 'jobs:create' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Publicar Vaga</a>
+                                {% endif %}
+                                <hr class="my-1">
+                                <a href="{% url 'accounts:logout' %}" class="block px-4 py-2 text-red-600 hover:bg-gray-100">Sair</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="text-white hover:text-gray-200 px-3 py-2">Entrar</a>
+                        <a href="{% url 'accounts:register' %}" class="bg-white text-primary px-4 py-2 rounded-lg hover:bg-gray-100 font-medium">Cadastrar</a>
+                    {% endif %}
+                </div>
+                
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-white">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="mobile-menu" class="hidden md:hidden bg-primary-dark">
+            <div class="px-4 py-3 space-y-2">
+                <a href="{% url 'jobs:list' %}" class="block text-white py-2">Vagas</a>
+                <a href="{% url 'courses:list' %}" class="block text-white py-2">Cursos</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'messaging:list' %}" class="block text-white py-2">Mensagens</a>
+                    <a href="{% url 'chatbot:chat' %}" class="block text-white py-2">Chat IA</a>
+                    <a href="{% url 'dashboard:index' %}" class="block text-white py-2">Dashboard</a>
+                    {% if user.is_staff or user.is_admin_user %}
+                    <a href="{% url 'dashboard:index' %}" class="block text-yellow-300 py-2 font-semibold">Admin Dashboard</a>
+                    {% endif %}
+                    <a href="{% url 'accounts:profile' %}" class="block text-white py-2">Meu Perfil</a>
+                    <a href="{% url 'accounts:logout' %}" class="block text-red-300 py-2">Sair</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="block text-white py-2">Entrar</a>
+                    <a href="{% url 'accounts:register' %}" class="block text-white py-2">Cadastrar</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 mt-4">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg mb-2 {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-auto">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">TalentMatch</h3>
+                    <p class="text-gray-400">Conectando talentos a oportunidades com inteligencia artificial.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Para Candidatos</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="{% url 'jobs:list' %}" class="hover:text-white">Buscar Vagas</a></li>
+                        <li><a href="{% url 'courses:list' %}" class="hover:text-white">Cursos</a></li>
+                        <li><a href="{% url 'chatbot:chat' %}" class="hover:text-white">Chat IA</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Para Empresas</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="{% url 'accounts:register_company' %}" class="hover:text-white">Cadastrar Empresa</a></li>
+                        <li><a href="{% url 'jobs:create' %}" class="hover:text-white">Publicar Vaga</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="{% url 'core:about' %}" class="hover:text-white">Sobre</a></li>
+                        <li><a href="{% url 'core:contact' %}" class="hover:text-white">Contato</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 TalentMatch. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

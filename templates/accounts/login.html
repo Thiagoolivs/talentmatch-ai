@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Entrar - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Entrar</h1>
+            <p class="text-gray-600 mt-2">Acesse sua conta TalentMatch</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="bg-red-100 text-red-700 p-4 rounded-lg">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Usuario</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.username.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Senha</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="text-right">
+                    <a href="{% url 'accounts:password_reset' %}" class="text-primary text-sm hover:underline">Esqueceu sua senha?</a>
+                </div>
+                
+                <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-dark transition">
+                    Entrar
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">
+                    Nao tem uma conta? 
+                    <a href="{% url 'accounts:register' %}" class="text-primary font-medium hover:underline">Cadastre-se</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

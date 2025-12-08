@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Chat com {% if other_user.is_company and other_user.company_profile %}{{ other_user.company_profile.company_name }}{% else %}{{ other_user.get_full_name|default:other_user.username }}{% endif %} - TalentMatch{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: calc(100vh - 300px);
+        min-height: 400px;
+    }
+    .message-bubble {
+        max-width: 70%;
+        word-wrap: break-word;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-4">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-primary text-white p-4 flex items-center">
+            <a href="{% url 'messaging:list' %}" class="mr-4 hover:text-gray-200">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </a>
+            
+            <div class="flex-shrink-0">
+                {% if other_user.avatar %}
+                <img src="{{ other_user.avatar.url }}" 
+                     alt="{{ other_user.username }}"
+                     class="w-10 h-10 rounded-full object-cover">
+                {% else %}
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center text-white font-bold">
+                    {{ other_user.username|slice:":1"|upper }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="ml-3">
+                <h2 class="font-semibold">
+                    {% if other_user.is_company and other_user.company_profile %}
+                        {{ other_user.company_profile.company_name }}
+                    {% else %}
+                        {{ other_user.get_full_name|default:other_user.username }}
+                    {% endif %}
+                </h2>
+                <p class="text-sm text-blue-100">
+                    {% if other_user.is_company %}Empresa{% else %}Candidato{% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <div id="chat-messages" class="chat-container overflow-y-auto p-4 bg-gray-100 space-y-4">
+            {% if conversation.application %}
+            <div class="text-center">
+                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">
+                    Conversa sobre: {{ conversation.application.job.title }}
+                </span>
+            </div>
+            {% endif %}
+            
+            {% for message in messages %}
+            <div class="flex {% if message.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
+                <div class="message-bubble {% if message.sender == request.user %}bg-primary text-white{% else %}bg-white text-gray-800{% endif %} rounded-lg px-4 py-2 shadow">
+                    <p>{{ message.text }}</p>
+                    <p class="text-xs {% if message.sender == request.user %}text-blue-100{% else %}text-gray-500{% endif %} mt-1 text-right">
+                        {{ message.created_at|date:"H:i" }}
+                    </p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-gray-500 py-8">
+                <p>Nenhuma mensagem ainda. Seja o primeiro a enviar!</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="p-4 bg-white border-t">
+            <form id="message-form" method="post" action="{% url 'messaging:send' other_user.id %}" class="flex gap-2">
+                {% csrf_token %}
+                <input type="text" 
+                       name="text" 
+                       id="message-input"
+                       placeholder="Digite sua mensagem..." 
+                       class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       required
+                       autocomplete="off">
+                <button type="submit" 
+                        class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition flex items-center">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const chatContainer = document.getElementById('chat-messages');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    
+    document.getElementById('message-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const input = document.getElementById('message-input');
+        const text = input.value.trim();
+        
+        if (!text) return;
+        
+        const formData = new FormData(this);
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'flex justify-end';
+                messageDiv.innerHTML = `
+                    <div class="message-bubble bg-primary text-white rounded-lg px-4 py-2 shadow">
+                        <p>${data.message.text}</p>
+                        <p class="text-xs text-blue-100 mt-1 text-right">${data.message.created_at}</p>
+                    </div>
+                `;
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                input.value = '';
+            } else {
+                alert(data.error || 'Erro ao enviar mensagem');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao enviar mensagem');
+        });
+    });
+    
+    setInterval(function() {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}

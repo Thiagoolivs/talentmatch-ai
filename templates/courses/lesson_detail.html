@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lesson.title }} - {{ course.title }} - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <aside class="lg:w-1/4">
+            <div class="bg-white rounded-lg shadow-md p-4 sticky top-4">
+                <h3 class="font-bold text-gray-800 mb-4">{{ course.title }}</h3>
+                
+                <nav class="space-y-2">
+                    {% for l in lessons %}
+                    <a href="{% url 'courses:lesson_detail' course.pk l.pk %}" 
+                       class="block px-3 py-2 rounded-lg text-sm {% if l.pk == lesson.pk %}bg-primary text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        {{ forloop.counter }}. {{ l.title }}
+                    </a>
+                    {% endfor %}
+                </nav>
+                
+                <div class="mt-6 pt-4 border-t">
+                    <a href="{% url 'courses:detail' course.pk %}" class="text-primary hover:underline text-sm">
+                        Voltar ao curso
+                    </a>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="lg:w-3/4">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="mb-6">
+                    <span class="text-sm text-gray-500">Aula {{ lesson.order }}</span>
+                    <h1 class="text-2xl font-bold text-gray-800 mt-1">{{ lesson.title }}</h1>
+                    {% if lesson.duration_minutes %}
+                    <span class="text-sm text-gray-500">Duracao: {{ lesson.duration_minutes }} minutos</span>
+                    {% endif %}
+                </div>
+                
+                {% if lesson.video_url %}
+                <div class="mb-6">
+                    <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                        {% if 'youtube' in lesson.video_url or 'youtu.be' in lesson.video_url %}
+                        <iframe 
+                            class="w-full h-full"
+                            src="{{ lesson.video_url|replace:'watch?v=':'embed/' }}"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                        </iframe>
+                        {% else %}
+                        <a href="{{ lesson.video_url }}" target="_blank" class="flex items-center justify-center h-full text-primary hover:underline">
+                            <svg class="w-12 h-12 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Assistir Video
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="prose max-w-none">
+                    {{ lesson.content|linebreaks }}
+                </div>
+                
+                <div class="mt-8 pt-6 border-t flex justify-between items-center">
+                    {% if prev_lesson %}
+                    <a href="{% url 'courses:lesson_detail' course.pk prev_lesson.pk %}" 
+                       class="flex items-center text-primary hover:underline">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        {{ prev_lesson.title|truncatechars:30 }}
+                    </a>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+                    
+                    {% if next_lesson %}
+                    <a href="{% url 'courses:lesson_detail' course.pk next_lesson.pk %}" 
+                       class="flex items-center text-primary hover:underline">
+                        {{ next_lesson.title|truncatechars:30 }}
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'courses:complete' course.pk %}" 
+                       class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition">
+                        Concluir Curso
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

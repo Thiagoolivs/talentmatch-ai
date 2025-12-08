@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Cursos Recomendados - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">Cursos Recomendados para Voce</h1>
+    <p class="text-gray-600 mb-8">Baseado nas habilidades em demanda e no seu perfil</p>
+    
+    {% if skill_gaps %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+        <p class="font-medium text-yellow-800 mb-2">Habilidades em alta que voce pode desenvolver:</p>
+        <div class="flex flex-wrap gap-2">
+            {% for skill in skill_gaps %}
+            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">{{ skill }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if recommendations %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for rec in recommendations %}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-2">{{ rec.course.title }}</h3>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="px-2 py-1 bg-blue-100 text-primary text-sm rounded">{{ rec.course.get_area_display }}</span>
+                <span class="px-2 py-1 bg-gray-100 text-gray-600 text-sm rounded">{{ rec.course.get_level_display }}</span>
+                <span class="text-gray-500 text-sm">{{ rec.course.duration_hours }}h</span>
+            </div>
+            <p class="text-gray-600 text-sm mb-3">{{ rec.course.description|truncatewords:20 }}</p>
+            <p class="text-sm text-green-600 mb-4">
+                <span class="font-medium">Desenvolve:</span> {{ rec.matching_skills|join:", " }}
+            </p>
+            <a href="{% url 'courses:detail' rec.course.pk %}" class="block text-center bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition">
+                Ver Curso
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow-md p-8 text-center">
+        <p class="text-gray-600 text-lg mb-4">Nao encontramos cursos especificos para suas necessidades no momento.</p>
+        <a href="{% url 'courses:list' %}" class="inline-block bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
+            Ver Todos os Cursos
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

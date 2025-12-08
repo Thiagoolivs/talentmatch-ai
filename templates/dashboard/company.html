@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Empresa - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Dashboard da Empresa</h1>
+        <a href="{% url 'jobs:create' %}" class="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-primary-dark transition">
+            Nova Vaga
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-primary">{{ total_jobs }}</p>
+            <p class="text-gray-600">Total de Vagas</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-green-600">{{ active_jobs }}</p>
+            <p class="text-gray-600">Vagas Ativas</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+            <p class="text-3xl font-bold text-blue-600">{{ total_applications }}</p>
+            <p class="text-gray-600">Candidaturas Recebidas</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Suas Vagas</h2>
+            {% if jobs_with_stats %}
+            <div class="space-y-4">
+                {% for item in jobs_with_stats %}
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <a href="{% url 'jobs:detail' item.job.pk %}" class="font-medium text-gray-800 hover:text-primary">{{ item.job.title }}</a>
+                            <p class="text-gray-500 text-sm">{{ item.job.location }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-primary">{{ item.total_applications }} candidatos</p>
+                            <p class="text-yellow-600 text-sm">{{ item.new_applications }} novos</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex space-x-2">
+                        <a href="{% url 'jobs:applications' item.job.pk %}" class="text-primary text-sm hover:underline">Ver candidatos</a>
+                        <span class="text-gray-300">|</span>
+                        <a href="{% url 'match:recommended_candidates' item.job.pk %}" class="text-primary text-sm hover:underline">Recomendados</a>
+                        <span class="text-gray-300">|</span>
+                        <a href="{% url 'jobs:edit' item.job.pk %}" class="text-primary text-sm hover:underline">Editar</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">Nenhuma vaga publicada ainda</p>
+            {% endif %}
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Candidaturas Recentes</h2>
+            {% if recent_applications %}
+            <div class="space-y-4">
+                {% for app in recent_applications %}
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-medium text-gray-800">{{ app.candidate.get_full_name|default:app.candidate.username }}</p>
+                            <p class="text-gray-500 text-sm">{{ app.job.title }}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="px-2 py-1 bg-primary text-white text-sm rounded">{{ app.match_score|floatformat:0 }}% match</span>
+                            <p class="text-gray-500 text-xs mt-1">{{ app.applied_at|date:"d/m" }}</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'jobs:application_detail' app.pk %}" class="mt-2 inline-block text-primary text-sm hover:underline">Ver candidatura</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">Nenhuma candidatura recebida</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Distribuicao de Candidaturas</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center p-4 bg-blue-50 rounded-lg">
+                <p class="text-2xl font-bold text-blue-600">{{ status_distribution.submitted }}</p>
+                <p class="text-gray-600 text-sm">Novos</p>
+            </div>
+            <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                <p class="text-2xl font-bold text-yellow-600">{{ status_distribution.analyzing }}</p>
+                <p class="text-gray-600 text-sm">Em Analise</p>
+            </div>
+            <div class="text-center p-4 bg-green-50 rounded-lg">
+                <p class="text-2xl font-bold text-green-600">{{ status_distribution.preselected }}</p>
+                <p class="text-gray-600 text-sm">Pre-selecionados</p>
+            </div>
+            <div class="text-center p-4 bg-red-50 rounded-lg">
+                <p class="text-2xl font-bold text-red-600">{{ status_distribution.rejected }}</p>
+                <p class="text-gray-600 text-sm">Rejeitados</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

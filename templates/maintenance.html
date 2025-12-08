@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manutencao - TalentMatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#005BBB',
+                        'primary-dark': '#004a99',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full mx-4">
+        <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                </svg>
+            </div>
+            
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">Site em Manutencao</h1>
+            
+            <p class="text-gray-600 mb-6">{{ message }}</p>
+            
+            {% if end_time %}
+            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                <p class="text-sm text-blue-800">
+                    <strong>Previsao de retorno:</strong><br>
+                    {{ end_time|date:"d/m/Y H:i" }}
+                </p>
+            </div>
+            {% endif %}
+            
+            <div class="text-gray-500 text-sm">
+                <p>Pedimos desculpas pelo inconveniente.</p>
+                <p>Em breve estaremos de volta!</p>
+            </div>
+            
+            <div class="mt-8">
+                <a href="/" class="text-primary hover:text-primary-dark">
+                    Tentar novamente
+                </a>
+            </div>
+        </div>
+        
+        <div class="text-center mt-6 text-gray-500 text-sm">
+            TalentMatch
+        </div>
+    </div>
+</body>
+</html>

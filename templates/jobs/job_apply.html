@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Candidatar-se - {{ job.title }} - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-2">{{ job.title }}</h2>
+        <p class="text-primary">
+            {% if job.company.company_profile %}
+                {{ job.company.company_profile.company_name }}
+            {% else %}
+                {{ job.company.username }}
+            {% endif %}
+        </p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Candidatar-se</h1>
+        
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-gray-700 font-medium mb-2">Carta de Apresentacao</label>
+                {{ form.cover_letter }}
+                <p class="text-gray-500 text-sm mt-1">Conte-nos por que voce e ideal para esta vaga</p>
+            </div>
+            
+            <div>
+                <label class="block text-gray-700 font-medium mb-2">Curriculo (opcional)</label>
+                {{ form.resume }}
+                <p class="text-gray-500 text-sm mt-1">Se nao enviar, usaremos o curriculo do seu perfil</p>
+            </div>
+            
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'jobs:detail' job.pk %}" class="px-6 py-3 border border-gray-300 rounded-lg font-bold text-gray-700 hover:bg-gray-50 transition">
+                    Cancelar
+                </a>
+                <button type="submit" class="bg-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
+                    Enviar Candidatura
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
