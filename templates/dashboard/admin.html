@@ -191,9 +191,12 @@
         </div>
     </div>
     
-    <div class="mt-8 flex space-x-4">
+    <div class="mt-8 flex flex-wrap gap-4">
         <a href="/admin/" class="inline-block bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
             Acessar Admin Django
+        </a>
+        <a href="{% url 'dashboard:admin_users' %}" class="inline-block bg-gray-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition">
+            Gerenciar Usuarios
         </a>
         <a href="{% url 'dashboard:admin_companies' %}" class="inline-block bg-gray-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition">
             Gerenciar Empresas

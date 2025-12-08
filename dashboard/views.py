@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Count, Avg, Sum
+from django.db.models import Count, Avg, Sum, Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
@@ -412,3 +412,136 @@ def my_problems(request):
     return render(request, 'dashboard/my_problems.html', {
         'problems': problems,
     })
+
+
+@login_required
+def admin_users(request):
+    """Gerenciamento de usuarios para administradores."""
+    if not request.user.is_admin_user():
+        messages.error(request, 'Acesso negado.')
+        return redirect('core:home')
+    
+    users = User.objects.all().order_by('-created_at')
+    
+    search = request.GET.get('search', '').strip()
+    if search:
+        search_query = (
+            Q(username__icontains=search) |
+            Q(email__icontains=search) |
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search)
+        )
+        if search.isdigit():
+            search_query = search_query | Q(id=int(search))
+        users = users.filter(search_query)
+    
+    user_type_filter = request.GET.get('user_type', '')
+    if user_type_filter:
+        users = users.filter(user_type=user_type_filter)
+    
+    status_filter = request.GET.get('status', '')
+    if status_filter == 'active':
+        users = users.filter(is_active=True)
+    elif status_filter == 'inactive':
+        users = users.filter(is_active=False)
+    
+    from django.core.paginator import Paginator
+    paginator = Paginator(users, 20)
+    page = request.GET.get('page', 1)
+    users_page = paginator.get_page(page)
+    
+    return render(request, 'dashboard/admin_users.html', {
+        'users': users_page,
+        'search': search,
+        'user_type_filter': user_type_filter,
+        'status_filter': status_filter,
+        'user_types': User.USER_TYPE_CHOICES,
+    })
+
+
+@login_required
+@require_POST
+def delete_user(request, user_id):
+    """Exclui um usuario (soft delete - desativa a conta)."""
+    if not request.user.is_admin_user():
+        return JsonResponse({'error': 'Acesso negado'}, status=403)
+    
+    user = get_object_or_404(User, id=user_id)
+    
+    if user == request.user:
+        messages.error(request, 'Voce nao pode excluir sua propria conta.')
+        return redirect('dashboard:admin_users')
+    
+    if user.is_superuser:
+        messages.error(request, 'Nao e possivel excluir um superusuario.')
+        return redirect('dashboard:admin_users')
+    
+    action = request.POST.get('action', 'soft')
+    ip_address = request.META.get('REMOTE_ADDR')
+    
+    if action == 'hard':
+        username = user.username
+        user_id_deleted = user.id
+        
+        AuditLog.log_action(
+            user=request.user,
+            action='delete',
+            model_name='User',
+            object_id=user_id_deleted,
+            object_repr=username,
+            details={'action': 'hard_delete', 'user_type': user.user_type},
+            ip_address=ip_address
+        )
+        
+        user.delete()
+        messages.success(request, f'Usuario {username} excluido permanentemente.')
+    else:
+        user.is_active = False
+        user.save()
+        
+        AuditLog.log_action(
+            user=request.user,
+            action='update',
+            model_name='User',
+            object_id=user.id,
+            object_repr=user.username,
+            details={'action': 'soft_delete', 'is_active': False},
+            ip_address=ip_address
+        )
+        
+        messages.success(request, f'Usuario {user.username} desativado.')
+    
+    return redirect('dashboard:admin_users')
+
+
+@login_required
+@require_POST
+def toggle_user_active(request, user_id):
+    """Ativa/desativa um usuario."""
+    if not request.user.is_admin_user():
+        return JsonResponse({'error': 'Acesso negado'}, status=403)
+    
+    user = get_object_or_404(User, id=user_id)
+    
+    if user == request.user:
+        messages.error(request, 'Voce nao pode desativar sua propria conta.')
+        return redirect('dashboard:admin_users')
+    
+    user.is_active = not user.is_active
+    user.save()
+    
+    ip_address = request.META.get('REMOTE_ADDR')
+    AuditLog.log_action(
+        user=request.user,
+        action='update',
+        model_name='User',
+        object_id=user.id,
+        object_repr=user.username,
+        details={'is_active': user.is_active},
+        ip_address=ip_address
+    )
+    
+    status = 'ativado' if user.is_active else 'desativado'
+    messages.success(request, f'Usuario {user.username} {status}.')
+    
+    return redirect('dashboard:admin_users')

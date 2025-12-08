@@ -135,6 +135,7 @@ talentmatch/
    - Access control: only users with shared job applications can message
    - Chat-style bubble UI with automatic message polling
    - Unread message indicators
+   - "Enviar Mensagem" button on application detail page
 
 10. **Courses with Lessons**
     - Lesson model with order, content, video_url, duration
@@ -151,6 +152,49 @@ talentmatch/
     - "Mensagens" link for authenticated users
     - "Admin" link for staff users
     - Enhanced mobile menu support
+
+12. **Canonical Skills & Normalization System**
+    - CanonicalSkill model with 66 pre-defined skills (accounts/models.py)
+    - SkillCorrectionLog model for tracking skill corrections
+    - Similarity matching using difflib for auto-correction
+    - Integrated in CandidateProfileForm.clean_skills()
+    - Seed command: `python manage.py seed_skills`
+
+13. **Application Status History**
+    - New statuses: 'viewed' and 'interview_scheduled'
+    - ApplicationStatusHistory model tracks who/when/old->new changes
+    - Status history display on application detail page
+    - Notification sent on status changes
+
+14. **Admin Account Management**
+    - Idempotent admin creation: `python manage.py create_admin`
+    - Default admin: administrador / TalentMatch2025
+
+15. **Unapproved Company Restrictions**
+    - Block job creation for unapproved companies
+    - Block viewing applications for unapproved companies
+    - Block managing application status for unapproved companies
+
+16. **Audit Log System**
+    - AuditLog model tracks admin actions (accounts/models.py)
+    - Logs: company approvals/rejections, maintenance mode changes, user deletions
+    - Includes IP address tracking
+
+17. **Notification System**
+    - Notification model (accounts/models.py)
+    - In-app notifications for:
+      - Application status changes
+      - Company approval/rejection
+    - notify_user() class method for easy notification creation
+
+18. **Admin User Management**
+    - Full user management interface at /dashboard/admin/users/
+    - Search by username, email, name, or ID
+    - Filter by user type (candidate/company/admin) and status (active/inactive)
+    - Soft delete (deactivate) or hard delete users
+    - Toggle user active status
+    - Pagination support
+    - Audit logging for all user management actions
 
 ## Configuration Notes
 - ALLOWED_HOSTS set to ['*'] for development

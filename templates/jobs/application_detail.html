@@ -22,17 +22,27 @@
             </div>
         </div>
         
-        <div class="flex items-center space-x-4">
-            <span class="px-4 py-2 rounded-full text-sm font-bold
-                {% if application.status == 'submitted' %}bg-blue-100 text-blue-700
-                {% elif application.status == 'analyzing' %}bg-yellow-100 text-yellow-700
-                {% elif application.status == 'preselected' %}bg-green-100 text-green-700
-                {% elif application.status == 'rejected' %}bg-red-100 text-red-700
-                {% elif application.status == 'hired' %}bg-purple-100 text-purple-700
-                {% endif %}">
-                {{ application.get_status_display }}
-            </span>
-            <span class="text-gray-500">Enviado em {{ application.applied_at|date:"d/m/Y H:i" }}</span>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <span class="px-4 py-2 rounded-full text-sm font-bold
+                    {% if application.status == 'submitted' %}bg-blue-100 text-blue-700
+                    {% elif application.status == 'analyzing' %}bg-yellow-100 text-yellow-700
+                    {% elif application.status == 'preselected' %}bg-green-100 text-green-700
+                    {% elif application.status == 'rejected' %}bg-red-100 text-red-700
+                    {% elif application.status == 'hired' %}bg-purple-100 text-purple-700
+                    {% elif application.status == 'viewed' %}bg-gray-100 text-gray-700
+                    {% elif application.status == 'interview_scheduled' %}bg-indigo-100 text-indigo-700
+                    {% endif %}">
+                    {{ application.get_status_display }}
+                </span>
+                <span class="text-gray-500">Enviado em {{ application.applied_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <a href="{% url 'messaging:start' application.id %}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                Enviar Mensagem
+            </a>
         </div>
     </div>
     
@@ -88,6 +98,42 @@
                 Atualizar
             </button>
         </form>
+    </div>
+    {% endif %}
+    
+    {% if status_history %}
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Historico de Status</h2>
+        <div class="space-y-4">
+            {% for history in status_history %}
+            <div class="flex items-start border-l-4 border-primary pl-4 py-2">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-1 text-xs font-bold rounded bg-gray-100 text-gray-600">{{ history.get_old_status_display }}</span>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                        <span class="px-2 py-1 text-xs font-bold rounded
+                            {% if history.new_status == 'submitted' %}bg-blue-100 text-blue-700
+                            {% elif history.new_status == 'analyzing' %}bg-yellow-100 text-yellow-700
+                            {% elif history.new_status == 'preselected' %}bg-green-100 text-green-700
+                            {% elif history.new_status == 'rejected' %}bg-red-100 text-red-700
+                            {% elif history.new_status == 'hired' %}bg-purple-100 text-purple-700
+                            {% elif history.new_status == 'viewed' %}bg-gray-100 text-gray-700
+                            {% elif history.new_status == 'interview_scheduled' %}bg-indigo-100 text-indigo-700
+                            {% endif %}">{{ history.get_new_status_display }}</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Por {{ history.changed_by.get_full_name|default:history.changed_by.username }} 
+                        em {{ history.created_at|date:"d/m/Y H:i" }}
+                    </p>
+                    {% if history.notes %}
+                    <p class="text-sm text-gray-600 mt-1 italic">"{{ history.notes }}"</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
 </div>

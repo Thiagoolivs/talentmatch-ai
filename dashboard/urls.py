@@ -12,4 +12,7 @@ urlpatterns = [
     path('admin/problems/', views.admin_problems, name='admin_problems'),
     path('admin/problems/<int:problem_id>/update/', views.update_problem, name='update_problem'),
     path('admin/maintenance/toggle/', views.toggle_maintenance, name='toggle_maintenance'),
+    path('admin/users/', views.admin_users, name='admin_users'),
+    path('admin/users/<int:user_id>/delete/', views.delete_user, name='delete_user'),
+    path('admin/users/<int:user_id>/toggle-active/', views.toggle_user_active, name='toggle_user_active'),
 ]
