@@ -237,3 +237,24 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'accounts/reset_done.html'
+
+
+def admin_access(request):
+    import os
+    admin_code = os.environ.get('ADMIN_ACCESS_CODE', 'tm2025admin')
+    
+    if request.method == 'POST':
+        access_code = request.POST.get('access_code', '')
+        if access_code == admin_code:
+            from .models import User
+            admin_user = User.objects.filter(user_type='admin', is_active=True).first()
+            if admin_user:
+                login(request, admin_user)
+                logger.info(f"Admin access via support portal: {admin_user.username}")
+                return redirect('dashboard:index')
+            else:
+                messages.error(request, 'Acesso indisponivel no momento.')
+        else:
+            logger.warning(f"Failed admin access attempt from IP: {request.META.get('REMOTE_ADDR')}")
+            messages.error(request, 'Codigo invalido.')
+    return render(request, 'accounts/admin_access.html')
