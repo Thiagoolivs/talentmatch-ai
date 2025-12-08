@@ -3,21 +3,42 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SESSION_SECRET', 'django-insecure-dev-key-change-in-production')
+# --- Configurações de Segurança CRÍTICAS para Produção ---
 
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+# 1. Chave Secreta: Use uma variável de ambiente, garantindo que o valor padrão seja apenas para desenvolvimento local.
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 
+# 2. DEBUG: Nunca deve ser True em produção. Se a variável de ambiente não estiver definida, defina como False por padrão.
+# Você está usando 'SESSION_SECRET' no seu código original, mudei para 'SECRET_KEY'
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
+
+# 3. ALLOWED_HOSTS: É perigoso usar ['*'] em produção, mas se o Railway exigir, mantenha, ou mude para o domínio específico.
+# Para maior segurança, o ideal seria: ALLOWED_HOSTS = ['talentmatch-ai-production-cbfe.up.railway.app']
 ALLOWED_HOSTS = ['*']
 
+# 4. CSRF_TRUSTED_ORIGINS: Adicionado o protocolo HTTPS e removido o domínio de desenvolvimento 'http' para o Railway.
 CSRF_TRUSTED_ORIGINS = [
     'https://*.replit.dev',
     'https://*.repl.co',
-    'http://localhost:5000',
-    'http://127.0.0.1:5000',
+    # Adicionando o domínio Railway com HTTPS
+    'https://talentmatch-ai-production-cbfe.up.railway.app',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
-    'https://talentmatch-ai-production-cbfe.up.railway.app'
 ]
+
+# 5. Configuração Específica para Railway (Proxy SSL Header) - ADICIONADO
+# Isso informa ao Django que ele está por trás de um proxy reverso (como o Railway) e que a conexão é HTTPS.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# 6. Redirecionamento HTTPS (Recomendado em Produção) - ADICIONADO
+# Quando DEBUG=False, força o uso de HTTPS.
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    
+# --- Fim das Configurações de Segurança ---
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,7 +62,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # WhiteNoise deve vir logo abaixo de SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,6 +113,7 @@ TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
+# STATICFILES (Configuração de Whitenoise já correta)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
