@@ -61,3 +61,5 @@ pandas
 pillow
 scikit-learn
 whitenoise
+psycopg2-binary
+dj-database-url

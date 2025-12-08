@@ -1,4 +1,6 @@
 import os
+import dj_database_url # ADICIONE ISSO
+# ... outros imports
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -100,6 +102,23 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+# Substitua TODO o bloco de DATABASES por esta lógica que lê a URL
+
+# Esta é a configuração que o Railway usará
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.config(
+        conn_max_age=600, 
+        conn_health_checks=True,
+        ssl_require=True # Opcional, mas bom para conexões seguras
+    )
+# Se DATABASE_URL não estiver definida (ou seja, no desenvolvimento local), ele ainda usará SQLite3
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
