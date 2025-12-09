@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ENTRA NA PASTA ONDE ESTÁ O manage.py
-cd /app/*/
+cd /app/
 
 echo "▶ Aguardando PostgreSQL..."
 
