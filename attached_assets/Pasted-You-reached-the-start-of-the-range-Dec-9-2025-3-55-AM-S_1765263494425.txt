@@ -1,0 +1,74 @@
+You reached the start of the range
+Dec 9, 2025, 3:55 AM
+Starting Container
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, chatbot, contenttypes, courses, jobs, match, messaging, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying chatbot.0001_initial... OK
+  Applying courses.0001_initial... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying accounts.0004_canonicalskill_auditlog_notification_and_more... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_add_company_verification_and_admin_features... OK
+  Applying accounts.0003_add_candidate_profile_fields... OK
+  Applying courses.0002_lesson... OK
+  Applying jobs.0001_initial... OK
+  Applying jobs.0002_alter_application_status_applicationstatushistory... OK
+  Applying match.0001_initial... OK
+  Applying messaging.0001_initial... OK
+  Applying sessions.0001_initial... OK
+163 static files copied to '/app/staticfiles'.
+Admin user "administrador" created successfully.
+Curso criado: Logica de Programacao para Iniciantes
+  - Aula criada: Introducao a Logica
+  - Aula criada: Variaveis e Tipos de Dados
+  - Aula criada: Operadores
+  - Aula criada: Estruturas Condicionais
+  - Aula criada: Estruturas de Repeticao
+Curso criado: Fundamentos de Banco de Dados
+  - Aula criada: O que sao Bancos de Dados
+  - Aula criada: Modelagem de Dados
+  - Aula criada: SQL Basico - SELECT
+  - Aula criada: SQL Intermediario - JOINs
+  - Aula criada: INSERT, UPDATE e DELETE
+Curso criado: Introducao ao Django
+  - Aula criada: Configurando o Ambiente
+  - Aula criada: Models e ORM
+  - Aula criada: Views e URLs
+  - Aula criada: Templates
+  - Aula criada: Formularios
+  - Aula criada: Autenticacao
+Curso criado: Excel e Automacao (VBA Basico)
+  - Aula criada: Introducao ao VBA
+  - Aula criada: Gravando Macros
+  - Aula criada: Variaveis e Tipos no VBA
+  - Aula criada: Estruturas de Controle
+  - Aula criada: Manipulando Celulas
+Curso criado: Python para Data Science
+  - Aula criada: Ambiente de Data Science
+  - Aula criada: NumPy Essencial
+  - Aula criada: Pandas - DataFrames
+  - Aula criada: Limpeza de Dados
+  - Aula criada: Visualizacao com Matplotlib
+5 cursos criados com sucesso!
+Skills seeded: 66 created, 0 updated
+[2025-12-09 06:57:48 +0000] [1] [INFO] Starting gunicorn 23.0.0
+[2025-12-09 06:57:48 +0000] [1] [INFO] Listening at: http://0.0.0.0:8080 (1)
+[2025-12-09 06:57:48 +0000] [1] [INFO] Using worker: sync
+[2025-12-09 06:57:48 +0000] [385] [INFO] Booting worker with pid: 385
