@@ -20,6 +20,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.replit.dev',
     'https://*.repl.co',
+    'https://*.picard.replit.dev',
+    'http://localhost:5000',
+    'http://127.0.0.1:5000',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ]
