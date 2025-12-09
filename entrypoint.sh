@@ -23,4 +23,5 @@ python manage.py seed_courses || true
 python manage.py seed_skills || true
 
 echo "✔ Inicialização concluída. Subindo Gunicorn..."
-gunicorn core.wsgi:application --bind 0.0.0.0:8000
+gunicorn talentmatch.wsgi:application --bind 0.0.0.0:8000
+
