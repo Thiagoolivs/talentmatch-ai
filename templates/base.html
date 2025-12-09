@@ -46,14 +46,22 @@
                         {% if user.is_staff or user.is_admin_user %}
                         <a href="{% url 'dashboard:index' %}" class="text-yellow-300 hover:text-yellow-100 px-3 py-2 font-semibold">Admin</a>
                         {% endif %}
-                        <div class="relative group">
-                            <button class="text-white hover:text-gray-200 px-3 py-2 flex items-center">
+                        <div class="relative" id="user-dropdown-container">
+                            <button id="user-dropdown-btn" class="text-white hover:text-gray-200 px-3 py-2 flex items-center" aria-expanded="false" aria-haspopup="true">
                                 {{ user.username }}
-                                <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="ml-1 h-4 w-4 transition-transform" id="dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block z-50">
+                            <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-50">
+                                <div class="flex justify-between items-center px-4 py-2 border-b border-gray-100">
+                                    <span class="text-sm font-medium text-gray-700">Menu</span>
+                                    <button id="dropdown-close-btn" class="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100" title="Fechar">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                                 <a href="{% url 'accounts:profile' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Meu Perfil</a>
                                 {% if user.is_candidate %}
                                     <a href="{% url 'jobs:my_applications' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Minhas Candidaturas</a>
@@ -157,6 +165,58 @@
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
+
+        (function() {
+            const dropdownBtn = document.getElementById('user-dropdown-btn');
+            const dropdownMenu = document.getElementById('user-dropdown-menu');
+            const dropdownCloseBtn = document.getElementById('dropdown-close-btn');
+            const dropdownArrow = document.getElementById('dropdown-arrow');
+            
+            if (!dropdownBtn || !dropdownMenu) return;
+
+            function openDropdown() {
+                dropdownMenu.classList.remove('hidden');
+                dropdownBtn.setAttribute('aria-expanded', 'true');
+                if (dropdownArrow) dropdownArrow.style.transform = 'rotate(180deg)';
+            }
+
+            function closeDropdown() {
+                dropdownMenu.classList.add('hidden');
+                dropdownBtn.setAttribute('aria-expanded', 'false');
+                if (dropdownArrow) dropdownArrow.style.transform = 'rotate(0deg)';
+            }
+
+            function toggleDropdown(e) {
+                e.stopPropagation();
+                if (dropdownMenu.classList.contains('hidden')) {
+                    openDropdown();
+                } else {
+                    closeDropdown();
+                }
+            }
+
+            dropdownBtn.addEventListener('click', toggleDropdown);
+
+            if (dropdownCloseBtn) {
+                dropdownCloseBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    closeDropdown();
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (!dropdownMenu.contains(e.target) && !dropdownBtn.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !dropdownMenu.classList.contains('hidden')) {
+                    closeDropdown();
+                    dropdownBtn.focus();
+                }
+            });
+        })();
     </script>
     {% block extra_js %}{% endblock %}
 </body>
