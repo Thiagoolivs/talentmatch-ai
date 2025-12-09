@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 🔐 SEGURANÇA
 # -------------------------------------------
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
+SECRET_KEY = os.environ.get('SESSION_SECRET', os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-production'))
 
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
@@ -90,6 +90,22 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'talentmatch.urls'
 WSGI_APPLICATION = 'talentmatch.wsgi.application'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 # -------------------------------------------
 # 🗄️ BANCO DE DADOS
