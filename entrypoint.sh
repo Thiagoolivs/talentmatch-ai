@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# GARANTE que o Django está no diretório certo
-cd /app  # <-- AJUSTAR para o caminho correto onde está manage.py
+# ENTRA NA PASTA ONDE ESTÁ O manage.py
+cd /app/*/
 
 echo "▶ Aguardando PostgreSQL..."
 
