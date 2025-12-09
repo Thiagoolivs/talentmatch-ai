@@ -24,4 +24,4 @@ python manage.py seed_courses || true
 python manage.py seed_skills || true
 
 echo "✔ Iniciando Gunicorn..."
-gunicorn talentmatch.wsgi:application --bind 0.0.0.0:8000
+gunicorn talentmatch.wsgi:application --bind 0.0.0.0:$PORT
