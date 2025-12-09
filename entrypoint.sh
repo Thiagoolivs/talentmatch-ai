@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# GARANTE que o Django está no diretório certo
+cd /app  # <-- AJUSTAR para o caminho correto onde está manage.py
+
 echo "▶ Aguardando PostgreSQL..."
 
 while ! nc -z $PGHOST $PGPORT; do
@@ -10,7 +13,7 @@ done
 echo "✔ Banco disponível!"
 
 echo "▶ Migrações..."
-python manage.py migrate
+python manage.py migrate --noinput
 
 echo "▶ Static..."
 python manage.py collectstatic --noinput
@@ -22,4 +25,3 @@ python manage.py seed_skills || true
 
 echo "✔ Iniciando Gunicorn..."
 gunicorn talentmatch.wsgi:application --bind 0.0.0.0:8000
-
