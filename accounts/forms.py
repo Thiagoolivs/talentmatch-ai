@@ -200,15 +200,15 @@ class CandidateProfileForm(forms.ModelForm):
                     field.widget.attrs['class'] = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
         self.fields['city'].required = True
         self.fields['state'].required = True
-        self.fields['bio'].help_text = 'Minimo 20 caracteres, maximo 500 caracteres.'
+        self.fields['bio'].help_text = 'Minimo 20 caracteres, maximo 1000 caracteres.'
     
     def clean_bio(self):
         bio = self.cleaned_data.get('bio', '')
         if bio:
             if len(bio) < 20:
                 raise forms.ValidationError('O resumo deve ter no minimo 20 caracteres.')
-            if len(bio) > 500:
-                raise forms.ValidationError('O resumo deve ter no maximo 500 caracteres.')
+            if len(bio) > 1000:
+                raise forms.ValidationError('O resumo deve ter no maximo 1000 caracteres.')
         return bio
     
     def clean_age(self):

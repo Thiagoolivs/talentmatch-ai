@@ -38,7 +38,7 @@ class CandidateProfile(models.Model):
     )
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='candidate_profile')
-    bio = models.TextField(blank=True, help_text='Resumo profissional (20-500 caracteres)')
+    bio = models.TextField(blank=True, help_text='Resumo profissional (20-1000 caracteres)')
     skills = models.TextField(help_text='Separe as habilidades por virgula', blank=True)
     experience = models.TextField(blank=True)
     experience_years = models.PositiveIntegerField(default=0, help_text='Anos de experiencia')
