@@ -1,0 +1,1 @@
+web: python manage.py migrate && python manage.py collectstatic --noinput && python manage.py create_admin && python manage.py seed_courses && python manage.py seed_skills && gunicorn talentmatch.wsgi --bind 0.0.0.0:$PORT

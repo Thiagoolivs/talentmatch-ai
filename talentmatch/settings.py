@@ -18,6 +18,7 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
+    'https://*.up.railway.app',
     'https://*.replit.dev',
     'https://*.repl.co',
     'https://*.picard.replit.dev',
