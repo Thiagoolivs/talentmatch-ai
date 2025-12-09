@@ -9,19 +9,17 @@ done
 
 echo "✔ Banco disponível!"
 
-echo "▶ Rodando migrações..."
+echo "▶ Migrações..."
 python manage.py migrate
 
-echo "▶ Coletando estáticos..."
+echo "▶ Static..."
 python manage.py collectstatic --noinput
 
-echo "▶ Criando admin (idempotente)..."
+echo "▶ Seeds..."
 python manage.py create_admin || true
-
-echo "▶ Populando cursos e skills..."
 python manage.py seed_courses || true
 python manage.py seed_skills || true
 
-echo "✔ Inicialização concluída. Subindo Gunicorn..."
+echo "✔ Iniciando Gunicorn..."
 gunicorn talentmatch.wsgi:application --bind 0.0.0.0:8000
 
