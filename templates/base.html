@@ -217,6 +217,36 @@
                 }
             });
         })();
+
+        (function() {
+            function formatBrazilianPhone(value) {
+                let numbers = value.replace(/\D/g, '');
+                if (numbers.length > 11) numbers = numbers.slice(0, 11);
+                
+                if (numbers.length === 0) return '';
+                if (numbers.length <= 2) return '(' + numbers;
+                if (numbers.length <= 6) return '(' + numbers.slice(0, 2) + ') ' + numbers.slice(2);
+                if (numbers.length <= 10) {
+                    return '(' + numbers.slice(0, 2) + ') ' + numbers.slice(2, 6) + '-' + numbers.slice(6);
+                }
+                return '(' + numbers.slice(0, 2) + ') ' + numbers.slice(2, 7) + '-' + numbers.slice(7);
+            }
+
+            document.querySelectorAll('input[name="phone"], input[id*="phone"], input[placeholder*="XX"]').forEach(function(input) {
+                input.addEventListener('input', function(e) {
+                    const cursorPos = e.target.selectionStart;
+                    const oldLength = e.target.value.length;
+                    e.target.value = formatBrazilianPhone(e.target.value);
+                    const newLength = e.target.value.length;
+                    const newPos = cursorPos + (newLength - oldLength);
+                    e.target.setSelectionRange(newPos, newPos);
+                });
+
+                if (input.value) {
+                    input.value = formatBrazilianPhone(input.value);
+                }
+            });
+        })();
     </script>
     {% block extra_js %}{% endblock %}
 </body>
