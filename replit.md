@@ -63,6 +63,17 @@ talentmatch/
 - Development: `python manage.py runserver 0.0.0.0:5000`
 - Production: `gunicorn --bind=0.0.0.0:5000 --reuse-port talentmatch.wsgi:application`
 
+## Railway Deployment
+**Build Command:**
+```
+pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput && python manage.py create_admin && python manage.py seed_courses && python manage.py seed_skills
+```
+
+**Start Command:**
+```
+gunicorn --bind=0.0.0.0:$PORT talentmatch.wsgi:application
+```
+
 ## API Endpoints
 - `/api/users/` - User management
 - `/api/vagas/` - Job listings

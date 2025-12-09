@@ -48,6 +48,13 @@
                         {% endif %}
                         <div class="relative" id="user-dropdown-container">
                             <button id="user-dropdown-btn" class="text-white hover:text-gray-200 px-3 py-2 flex items-center" aria-expanded="false" aria-haspopup="true">
+                                {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-8 h-8 rounded-full object-cover mr-2 border-2 border-white">
+                                {% else %}
+                                <div class="w-8 h-8 rounded-full bg-white text-primary flex items-center justify-center mr-2 font-bold text-sm">
+                                    {{ user.username|slice:":1"|upper }}
+                                </div>
+                                {% endif %}
                                 {{ user.username }}
                                 <svg class="ml-1 h-4 w-4 transition-transform" id="dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
