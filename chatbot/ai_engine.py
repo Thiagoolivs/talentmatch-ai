@@ -52,23 +52,25 @@ def get_groq_response(client, user, message, session):
     """Gera resposta usando a API Groq."""
     try:
         context = build_user_context(user)
-        
-        history = session.messages.order_by('-created_at')[:10]
+        memory = get_memory_context(user)
+
+        history = session.messages.order_by('-created_at')[:20]
         messages = []
-        
+
         system_prompt = f"""Voce e o assistente virtual do TalentMatch, uma plataforma de empregos com IA.
 Seu objetivo e ajudar usuarios a encontrar vagas, melhorar seus curriculos e desenvolver suas carreiras.
 
 Contexto do usuario:
 {context}
-
+{memory}
 Diretrizes:
 - Responda sempre em portugues brasileiro
 - Seja amigavel, profissional e objetivo
 - Forneca dicas praticas e acionaveis
 - Use emojis moderadamente para tornar a conversa mais amigavel
 - Se o usuario perguntar sobre vagas ou cursos, baseie-se no contexto fornecido
-- Para analise de curriculo, use as informacoes do perfil do usuario"""
+- Para analise de curriculo, use as informacoes do perfil do usuario
+- Use a memoria de conversas anteriores para dar continuidade natural (nao repita apresentacoes se ja conversaram antes)"""
 
         messages.append({"role": "system", "content": system_prompt})
         
@@ -114,6 +116,78 @@ Diretrizes:
         else:
             logger.error(f"Erro inesperado na API Groq: {e}", exc_info=True)
             return get_local_response(user, message)
+
+
+def get_memory_context(user):
+    """Retorna o bloco de memória persistente para o system prompt."""
+    from .models import ChatMemory
+
+    memory = ChatMemory.objects.filter(user=user).first()
+    if not memory or not (memory.content or memory.recent_topics):
+        return ""
+
+    parts = ["\nMemoria de conversas anteriores com este usuario:"]
+    if memory.content:
+        parts.append(memory.content)
+    if memory.recent_topics:
+        parts.append(f"Topicos recentes: {memory.recent_topics}")
+    return "\n".join(parts) + "\n"
+
+
+def update_chat_memory(user, session):
+    """
+    Atualiza a memória persistente do usuário.
+
+    - Sempre mantém os tópicos recentes (funciona mesmo sem Groq).
+    - A cada 4 mensagens do usuário, usa o Groq (quando disponível) para
+      extrair/atualizar fatos duráveis sobre o usuário.
+    """
+    from .models import ChatMemory, ChatMessage
+
+    memory, _ = ChatMemory.objects.get_or_create(user=user)
+
+    recent_sessions = user.chat_sessions.order_by('-updated_at')[:3]
+    topics = []
+    for s in recent_sessions:
+        first = s.messages.filter(role='user').first()
+        if first:
+            topics.append(first.content[:80])
+    memory.recent_topics = ' | '.join(topics)
+
+    user_message_count = session.messages.filter(role='user').count()
+    client = get_groq_client()
+
+    if client and user_message_count > 0 and user_message_count % 4 == 0:
+        try:
+            recent = list(session.messages.order_by('-created_at')[:8])
+            transcript = "\n".join(
+                f"{'Usuario' if m.role == 'user' else 'Assistente'}: {m.content[:400]}"
+                for m in reversed(recent)
+            )
+            extraction_prompt = f"""Voce mantem a memoria de longo prazo de um assistente de carreira.
+
+Memoria atual sobre o usuario:
+{memory.content or '(vazia)'}
+
+Trecho recente da conversa:
+{transcript}
+
+Atualize a memoria: liste em ate 10 bullets curtos apenas fatos duraveis e uteis sobre o usuario (objetivos de carreira, preferencias de vaga/salario/localizacao, habilidades que quer desenvolver, situacao atual, restricoes). Mantenha fatos antigos que continuam validos, remova os obsoletos. Responda SOMENTE com os bullets, sem introducao."""
+
+            completion = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": extraction_prompt}],
+                temperature=0.2,
+                max_tokens=400,
+            )
+            extracted = completion.choices[0].message.content.strip()
+            if extracted:
+                memory.content = extracted[:4000]
+            logger.info(f"Memoria do chat atualizada para {user.username}")
+        except Exception as e:
+            logger.warning(f"Falha ao extrair memoria via Groq para {user.username}: {e}")
+
+    memory.save()
 
 
 def build_user_context(user):
@@ -187,8 +261,26 @@ def get_local_response(user, message):
 
 
 def get_greeting(user):
+    from .models import ChatMemory
+
     name = user.first_name or user.username
-    return f"""Ola, {name}! 
+
+    memory = ChatMemory.objects.filter(user=user).first()
+    if memory and memory.recent_topics:
+        last_topic = memory.recent_topics.split(' | ')[0]
+        return f"""Ola de novo, {name}!
+
+Que bom te ver por aqui outra vez. Da ultima vez conversamos sobre "{last_topic}".
+
+Posso continuar te ajudando com:
+- **Analise de curriculo** - Avalio seu perfil e dou dicas de melhoria
+- **Vagas recomendadas** - Encontro oportunidades que combinam com voce
+- **Cursos sugeridos** - Identifico habilidades para desenvolver
+- **Dicas de carreira** - Oriento sobre sua jornada profissional
+
+Como posso ajudar hoje?"""
+
+    return f"""Ola, {name}!
 
 Sou o assistente virtual do TalentMatch e estou aqui para ajudar voce!
 

@@ -82,8 +82,10 @@ def send_message(request, user_id):
         sender=request.user,
         text=text
     )
-    
+
     conversation.save()
+
+    notify_new_message(request.user, other_user)
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({
@@ -97,6 +99,32 @@ def send_message(request, user_id):
         })
     
     return redirect('messaging:detail', user_id=user_id)
+
+
+def notify_new_message(sender, recipient):
+    """Notifica o destinatário sobre nova mensagem, sem duplicar enquanto houver uma não lida."""
+    from django.urls import reverse
+    from accounts.models import Notification
+
+    link = reverse('messaging:detail', args=[sender.id])
+    already_pending = Notification.objects.filter(
+        user=recipient,
+        notification_type='new_message',
+        link=link,
+        is_read=False
+    ).exists()
+
+    if not already_pending:
+        sender_name = sender.get_full_name() or sender.username
+        if sender.is_company() and hasattr(sender, 'company_profile'):
+            sender_name = sender.company_profile.company_name
+        Notification.notify_user(
+            user=recipient,
+            notification_type='new_message',
+            title='Nova mensagem',
+            message=f'{sender_name} enviou uma mensagem para você.',
+            link=link
+        )
 
 
 def can_message(user1, user2):

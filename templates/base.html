@@ -98,6 +98,10 @@
             background-image: radial-gradient(rgba(255,255,255,0.14) 1px, transparent 1px), linear-gradient(135deg, #07264b 0%, #005BBB 55%, #1b6cd9 100%);
             background-size: 22px 22px, auto;
         }
+        @media (prefers-reduced-motion: no-preference) {
+            [data-reveal] { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+            [data-reveal].revealed { opacity: 1; transform: none; }
+        }
         .toast-enter { animation: toast-in .3s ease-out both; }
         @keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
         #user-dropdown-menu, #mobile-menu { transition: opacity .15s ease, transform .15s ease; }
@@ -124,7 +128,12 @@
                         <a href="{% url 'jobs:list' %}" class="{% if ns == 'jobs' %}nav-link-active{% else %}nav-link{% endif %}">Vagas</a>
                         <a href="{% url 'courses:list' %}" class="{% if ns == 'courses' %}nav-link-active{% else %}nav-link{% endif %}">Cursos</a>
                         {% if user.is_authenticated %}
-                            <a href="{% url 'messaging:list' %}" class="{% if ns == 'messaging' %}nav-link-active{% else %}nav-link{% endif %}">Mensagens</a>
+                            <a href="{% url 'messaging:list' %}" class="{% if ns == 'messaging' %}nav-link-active{% else %}nav-link{% endif %} relative">
+                                Mensagens
+                                {% if unread_messages_count %}
+                                <span class="absolute -top-0.5 -right-1 min-w-[1.1rem] h-[1.1rem] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full inline-flex items-center justify-center">{{ unread_messages_count }}</span>
+                                {% endif %}
+                            </a>
                             <a href="{% url 'chatbot:chat' %}" class="{% if ns == 'chatbot' %}nav-link-active{% else %}nav-link{% endif %}">Chat IA</a>
                             <a href="{% url 'dashboard:index' %}" class="{% if ns == 'dashboard' %}nav-link-active{% else %}nav-link{% endif %}">Dashboard</a>
                         {% endif %}
@@ -134,6 +143,47 @@
 
                 <div class="hidden md:flex items-center gap-3">
                     {% if user.is_authenticated %}
+                        <div class="relative" id="notif-container">
+                            <button id="notif-btn" class="relative p-2 rounded-full text-slate-500 hover:text-brand-700 hover:bg-brand-50 transition-colors" aria-label="Notificações" aria-expanded="false" aria-haspopup="true">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                                {% if unread_notifications_count %}
+                                <span class="absolute top-0.5 right-0.5 min-w-[1.1rem] h-[1.1rem] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full inline-flex items-center justify-center">{{ unread_notifications_count }}</span>
+                                {% endif %}
+                            </button>
+                            <div id="notif-menu" class="menu-hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-dropdown border border-slate-200 z-50 overflow-hidden">
+                                <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                                    <p class="text-sm font-semibold text-slate-900">Notificações</p>
+                                    {% if unread_notifications_count %}
+                                    <span class="badge-blue">{{ unread_notifications_count }} nova{{ unread_notifications_count|pluralize:"s" }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="max-h-80 overflow-y-auto divide-y divide-slate-50">
+                                    {% for n in recent_notifications %}
+                                    <a href="{% url 'accounts:notification_open' n.pk %}" class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors {% if not n.is_read %}bg-brand-50/40{% endif %}">
+                                        <span class="mt-0.5 w-8 h-8 rounded-lg shrink-0 flex items-center justify-center {% if not n.is_read %}bg-brand-100 text-brand-700{% else %}bg-slate-100 text-slate-400{% endif %}">
+                                            {% if n.notification_type == 'new_message' %}
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                            {% elif n.notification_type == 'new_application' or n.notification_type == 'application_status' %}
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                            {% else %}
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            {% endif %}
+                                        </span>
+                                        <span class="min-w-0">
+                                            <span class="block text-sm {% if not n.is_read %}font-semibold text-slate-900{% else %}font-medium text-slate-600{% endif %} truncate">{{ n.title }}</span>
+                                            <span class="block text-xs text-slate-500 line-clamp-2">{{ n.message }}</span>
+                                            <span class="block text-[11px] text-slate-400 mt-0.5">{{ n.created_at|timesince }} atrás</span>
+                                        </span>
+                                    </a>
+                                    {% empty %}
+                                    <div class="px-4 py-8 text-center text-sm text-slate-400">Nenhuma notificação ainda</div>
+                                    {% endfor %}
+                                </div>
+                                <a href="{% url 'accounts:notifications' %}" class="block px-4 py-2.5 text-center text-sm font-semibold text-brand-700 border-t border-slate-100 hover:bg-brand-50 transition-colors">Ver todas</a>
+                            </div>
+                        </div>
                         <div class="relative" id="user-dropdown-container">
                             <button id="user-dropdown-btn" class="flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 rounded-full border border-slate-200 hover:border-brand-300 hover:bg-brand-50/50 transition-colors" aria-expanded="false" aria-haspopup="true">
                                 {% if user.avatar %}
@@ -205,7 +255,14 @@
                 <a href="{% url 'jobs:list' %}" class="mobile-link">Vagas</a>
                 <a href="{% url 'courses:list' %}" class="mobile-link">Cursos</a>
                 {% if user.is_authenticated %}
-                    <a href="{% url 'messaging:list' %}" class="mobile-link">Mensagens</a>
+                    <a href="{% url 'messaging:list' %}" class="mobile-link">
+                        Mensagens
+                        {% if unread_messages_count %}<span class="ml-auto min-w-[1.25rem] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full inline-flex items-center justify-center">{{ unread_messages_count }}</span>{% endif %}
+                    </a>
+                    <a href="{% url 'accounts:notifications' %}" class="mobile-link">
+                        Notificações
+                        {% if unread_notifications_count %}<span class="ml-auto min-w-[1.25rem] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full inline-flex items-center justify-center">{{ unread_notifications_count }}</span>{% endif %}
+                    </a>
                     <a href="{% url 'chatbot:chat' %}" class="mobile-link">Chat IA</a>
                     <a href="{% url 'dashboard:index' %}" class="mobile-link">Dashboard</a>
                     <a href="{% url 'accounts:profile' %}" class="mobile-link">Meu Perfil</a>
@@ -315,28 +372,45 @@
         })();
 
         (function() {
-            const dropdownBtn = document.getElementById('user-dropdown-btn');
-            const dropdownMenu = document.getElementById('user-dropdown-menu');
-            const dropdownArrow = document.getElementById('dropdown-arrow');
-            if (!dropdownBtn || !dropdownMenu) return;
+            const dropdowns = [
+                { btn: 'user-dropdown-btn', menu: 'user-dropdown-menu', arrow: 'dropdown-arrow' },
+                { btn: 'notif-btn', menu: 'notif-menu', arrow: null },
+            ].map(function(cfg) {
+                return {
+                    btn: document.getElementById(cfg.btn),
+                    menu: document.getElementById(cfg.menu),
+                    arrow: cfg.arrow ? document.getElementById(cfg.arrow) : null,
+                };
+            }).filter(function(d) { return d.btn && d.menu; });
 
-            function setOpen(open) {
-                dropdownMenu.classList.toggle('menu-hidden', !open);
-                dropdownBtn.setAttribute('aria-expanded', String(open));
-                if (dropdownArrow) dropdownArrow.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+            function setOpen(d, open) {
+                d.menu.classList.toggle('menu-hidden', !open);
+                d.btn.setAttribute('aria-expanded', String(open));
+                if (d.arrow) d.arrow.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
             }
 
-            dropdownBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                setOpen(dropdownMenu.classList.contains('menu-hidden'));
+            dropdowns.forEach(function(d) {
+                d.btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const willOpen = d.menu.classList.contains('menu-hidden');
+                    dropdowns.forEach(function(other) { setOpen(other, false); });
+                    setOpen(d, willOpen);
+                });
             });
+
             document.addEventListener('click', function(e) {
-                if (!dropdownMenu.contains(e.target) && !dropdownBtn.contains(e.target)) setOpen(false);
+                dropdowns.forEach(function(d) {
+                    if (!d.menu.contains(e.target) && !d.btn.contains(e.target)) setOpen(d, false);
+                });
             });
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && !dropdownMenu.classList.contains('menu-hidden')) {
-                    setOpen(false);
-                    dropdownBtn.focus();
+                if (e.key === 'Escape') {
+                    dropdowns.forEach(function(d) {
+                        if (!d.menu.classList.contains('menu-hidden')) {
+                            setOpen(d, false);
+                            d.btn.focus();
+                        }
+                    });
                 }
             });
         })();
@@ -384,6 +458,63 @@
                 if (input.value) {
                     input.value = formatBrazilianPhone(input.value);
                 }
+            });
+        })();
+        (function() {
+            const revealEls = document.querySelectorAll('[data-reveal]');
+            if (revealEls.length && 'IntersectionObserver' in window) {
+                const observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            const delay = parseInt(entry.target.dataset.revealDelay || '0', 10);
+                            setTimeout(function() { entry.target.classList.add('revealed'); }, delay);
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.12 });
+                revealEls.forEach(function(el) { observer.observe(el); });
+            } else {
+                revealEls.forEach(function(el) { el.classList.add('revealed'); });
+            }
+        })();
+
+        (function() {
+            const counters = document.querySelectorAll('[data-countup]');
+            if (!counters.length) return;
+
+            function animate(el) {
+                const target = parseInt(el.dataset.countup, 10);
+                if (isNaN(target)) return;
+                const suffix = el.dataset.countupSuffix || '';
+                const duration = 1200;
+                const start = performance.now();
+                function tick(now) {
+                    const progress = Math.min((now - start) / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    el.textContent = Math.round(target * eased).toLocaleString('pt-BR') + suffix;
+                    if (progress < 1) requestAnimationFrame(tick);
+                }
+                requestAnimationFrame(tick);
+            }
+
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            animate(entry.target);
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.4 });
+                counters.forEach(function(el) { observer.observe(el); });
+            } else {
+                counters.forEach(animate);
+            }
+        })();
+
+        (function() {
+            document.querySelectorAll('form [data-autosubmit]').forEach(function(el) {
+                el.addEventListener('change', function() { el.closest('form').submit(); });
             });
         })();
     </script>

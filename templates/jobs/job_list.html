@@ -35,7 +35,7 @@
                     </div>
                     <div>
                         <label class="form-label">Tipo de Vaga</label>
-                        <select name="job_type" class="input-field">
+                        <select name="job_type" class="input-field" data-autosubmit>
                             <option value="">Todos</option>
                             <option value="full_time" {% if request.GET.job_type == 'full_time' %}selected{% endif %}>Tempo Integral</option>
                             <option value="part_time" {% if request.GET.job_type == 'part_time' %}selected{% endif %}>Meio Período</option>
@@ -46,7 +46,7 @@
                     </div>
                     <div>
                         <label class="form-label">Modelo</label>
-                        <select name="work_mode" class="input-field">
+                        <select name="work_mode" class="input-field" data-autosubmit>
                             <option value="">Todos</option>
                             <option value="onsite" {% if request.GET.work_mode == 'onsite' %}selected{% endif %}>Presencial</option>
                             <option value="remote" {% if request.GET.work_mode == 'remote' %}selected{% endif %}>Remoto</option>

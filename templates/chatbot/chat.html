@@ -52,7 +52,7 @@
         <div class="border-t border-slate-200 p-4 bg-white">
             <form id="chat-form" class="flex gap-2">
                 {% csrf_token %}
-                <input type="text" id="message-input" placeholder="Digite sua mensagem..." class="input-field flex-grow" autocomplete="off">
+                <input type="text" id="message-input" placeholder="Digite sua mensagem..." class="input-field flex-grow" autocomplete="off" autofocus>
                 <button type="submit" id="send-btn" class="btn-primary shrink-0">
                     <span id="send-btn-label">Enviar</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
