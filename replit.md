@@ -64,15 +64,14 @@ talentmatch/
 - Production: `gunicorn --bind=0.0.0.0:5000 --reuse-port talentmatch.wsgi:application`
 
 ## Railway Deployment
-**Build Command:**
-```
-pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput && python manage.py create_admin && python manage.py seed_courses && python manage.py seed_skills
-```
+Configured via `railway.json` (Nixpacks). The deploy pipeline is:
 
-**Start Command:**
-```
-gunicorn --bind=0.0.0.0:$PORT talentmatch.wsgi:application
-```
+1. **Build**: dependencies installed by Nixpacks, then `collectstatic` bakes static files into the image (`build.buildCommand`)
+2. **Pre-deploy** (`deploy.preDeployCommand`): `migrate` + `create_admin` + `seed_courses` + `seed_skills` — runs once per deploy, before the new version receives traffic
+3. **Start** (`deploy.startCommand`): `gunicorn talentmatch.wsgi --bind 0.0.0.0:$PORT --workers 2 --timeout 60`
+4. **Healthcheck**: `GET /` must respond within 120s before traffic switches
+
+The `Procfile` mirrors this for Heroku-style platforms (`release` + `web` phases).
 
 ## API Endpoints
 - `/api/users/` - User management
@@ -85,6 +84,7 @@ gunicorn --bind=0.0.0.0:$PORT talentmatch.wsgi:application
 ## Environment Variables
 - `SESSION_SECRET` - Django secret key (required for production)
 - `GROQ_API_KEY` - Groq API key for AI chatbot (optional, falls back to local rules)
+- `EMAIL_VALIDATION_API_KEY` - AbstractAPI Email Validation key (optional; without it only the local disposable-domain blocklist applies). Validation is fail-open: API downtime never blocks signups. Results are cached for 24h.
 
 ## Recent Changes (December 2025)
 1. **Database Schema Enhancements**
