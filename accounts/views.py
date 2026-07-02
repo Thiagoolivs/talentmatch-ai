@@ -12,7 +12,7 @@ import logging
 
 from .forms import (CandidateRegistrationForm, CompanyRegistrationForm, 
                     CustomLoginForm, CandidateProfileForm, CompanyProfileForm, UserUpdateForm)
-from .models import CandidateProfile, CompanyProfile
+from .models import CandidateProfile, CompanyProfile, User
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +34,10 @@ def register_candidate(request):
                 with transaction.atomic():
                     user = form.save()
                     login(request, user)
-                    messages.success(request, 'Conta criada com sucesso! Complete seu perfil.')
-                    return redirect('accounts:profile')
+                from .verification import send_verification_code
+                send_verification_code(user, force=True)
+                messages.success(request, 'Conta criada! Enviamos um código de verificação para o seu email.')
+                return redirect('accounts:verify_email')
             except Exception as e:
                 logger.error(f"Erro ao registrar candidato: {e}")
                 messages.error(request, 'Ocorreu um erro ao criar sua conta. Tente novamente.')
@@ -62,8 +64,10 @@ def register_company(request):
                 with transaction.atomic():
                     user = form.save()
                     login(request, user)
-                    messages.success(request, 'Conta da empresa criada com sucesso! Complete seu perfil.')
-                    return redirect('accounts:profile')
+                from .verification import send_verification_code
+                send_verification_code(user, force=True)
+                messages.success(request, 'Conta da empresa criada! Enviamos um código de verificação para o seu email.')
+                return redirect('accounts:verify_email')
             except Exception as e:
                 logger.error(f"Erro ao registrar empresa: {e}")
                 messages.error(request, 'Ocorreu um erro ao criar sua conta. Tente novamente.')
@@ -128,10 +132,13 @@ def profile(request):
             profile_form = CandidateProfileForm(request.POST, request.FILES, instance=profile_obj)
             if user_form.is_valid() and profile_form.is_valid():
                 try:
+                    old_email = User.objects.get(pk=user.pk).email
                     with transaction.atomic():
                         user_form.save()
                         saved_profile = profile_form.save()
                         logger.info(f"Perfil salvo - User: {user.username}, City: {saved_profile.city}, State: {saved_profile.state}, Bio: {len(saved_profile.bio or '')} chars")
+                    if user.email != old_email:
+                        return _require_email_reverification(request, user)
                     messages.success(request, 'Perfil atualizado com sucesso!')
                     return redirect('accounts:profile')
                 except Exception as e:
@@ -175,10 +182,13 @@ def profile(request):
             profile_form = CompanyProfileForm(request.POST, request.FILES, instance=profile_obj)
             if user_form.is_valid() and profile_form.is_valid():
                 try:
+                    old_email = User.objects.get(pk=user.pk).email
                     with transaction.atomic():
                         user_form.save()
                         profile_form.save()
                         logger.info(f"Perfil da empresa {profile_obj.company_name} salvo com sucesso")
+                    if user.email != old_email:
+                        return _require_email_reverification(request, user)
                     messages.success(request, 'Perfil da empresa atualizado com sucesso!')
                     return redirect('accounts:profile')
                 except Exception as e:
@@ -292,3 +302,39 @@ def notification_open(request, pk):
     if notification.link:
         return redirect(notification.link)
     return redirect('accounts:notifications')
+
+
+def _require_email_reverification(request, user):
+    """Após troca de email, exige nova verificação por código."""
+    from .verification import send_verification_code
+    user.email_verified = False
+    user.save(update_fields=['email_verified'])
+    send_verification_code(user, force=True)
+    messages.info(request, 'Você alterou seu email. Enviamos um código de verificação para o novo endereço.')
+    return redirect('accounts:verify_email')
+
+
+@login_required
+def verify_email(request):
+    from .verification import send_verification_code, verify_code
+
+    user = request.user
+    if user.email_verified:
+        return redirect('dashboard:index')
+
+    if request.method == 'POST':
+        if request.POST.get('action') == 'resend':
+            ok, error = send_verification_code(user)
+            if ok:
+                messages.success(request, f'Novo código enviado para {user.email}.')
+            else:
+                messages.error(request, error)
+            return redirect('accounts:verify_email')
+
+        ok, error = verify_code(user, request.POST.get('code', ''))
+        if ok:
+            messages.success(request, 'Email verificado com sucesso! Bem-vindo ao TalentMatch.')
+            return redirect('dashboard:index')
+        messages.error(request, error)
+
+    return render(request, 'accounts/verify_email.html', {'email': user.email})

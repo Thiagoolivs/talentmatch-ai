@@ -85,6 +85,14 @@ The `Procfile` mirrors this for Heroku-style platforms (`release` + `web` phases
 - `SESSION_SECRET` - Django secret key (required for production)
 - `GROQ_API_KEY` - Groq API key for AI chatbot (optional, falls back to local rules)
 - `EMAIL_VALIDATION_API_KEY` - AbstractAPI Email Validation key (optional; without it only the local disposable-domain blocklist applies). Validation is fail-open: API downtime never blocks signups. Results are cached for 24h.
+- `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` / `EMAIL_USE_TLS` / `DEFAULT_FROM_EMAIL` - SMTP settings for sending real emails (verification codes, password reset). Without `EMAIL_HOST`, emails are printed to the console (dev mode).
+
+## Email Verification (OTP)
+- On signup (candidate or company) a 6-digit code is emailed to the user; the account must be verified before using the platform (`EmailVerificationMiddleware` gates all pages except login/logout/support/reset)
+- Code expires in 15 minutes, max 5 wrong attempts, resend cooldown of 60s
+- Changing the email in the profile resets verification and sends a new code
+- Users that existed before this feature were backfilled as verified (migration 0006)
+- Admins/staff are exempt
 
 ## Recent Changes (December 2025)
 1. **Database Schema Enhancements**

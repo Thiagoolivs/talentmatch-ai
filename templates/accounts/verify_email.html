@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Verificar Email - TalentMatch{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+            <div class="mx-auto w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center mb-5">
+                <svg class="w-8 h-8 text-brand-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold">Verifique seu Email</h1>
+            <p class="text-slate-500 mt-2">Enviamos um código de 6 dígitos para<br><strong class="text-slate-700">{{ email }}</strong></p>
+        </div>
+
+        <div class="card p-8">
+            <form method="post" id="verify-form" class="space-y-5">
+                {% csrf_token %}
+                <div>
+                    <label class="form-label text-center block">Código de verificação</label>
+                    <input type="text" name="code" id="code-input" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+                           class="input-field !text-2xl !font-bold text-center tracking-[0.6em] !py-4"
+                           placeholder="••••••" autocomplete="one-time-code" autofocus required>
+                    <p class="form-help text-center">O código expira em 15 minutos</p>
+                </div>
+
+                <button type="submit" class="btn-primary w-full !py-3">Confirmar Código</button>
+            </form>
+
+            <div class="mt-6 pt-6 border-t border-slate-100 text-center">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="resend">
+                    <p class="text-slate-500 text-sm mb-3">Não recebeu? Verifique a caixa de spam ou</p>
+                    <button type="submit" id="resend-btn" class="btn-secondary" disabled>
+                        Reenviar código <span id="resend-countdown" class="text-slate-400">(60s)</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'accounts:logout' %}" class="text-slate-400 text-sm hover:text-slate-600">Sair e verificar depois</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function() {
+        // auto-envio ao completar 6 dígitos
+        const input = document.getElementById('code-input');
+        const form = document.getElementById('verify-form');
+        input.addEventListener('input', function() {
+            input.value = input.value.replace(/\D/g, '').slice(0, 6);
+            if (input.value.length === 6) form.submit();
+        });
+
+        // cooldown do reenvio
+        const btn = document.getElementById('resend-btn');
+        const countdown = document.getElementById('resend-countdown');
+        let remaining = 60;
+        const timer = setInterval(function() {
+            remaining -= 1;
+            if (remaining <= 0) {
+                clearInterval(timer);
+                btn.disabled = false;
+                countdown.textContent = '';
+            } else {
+                countdown.textContent = '(' + remaining + 's)';
+            }
+        }, 1000);
+    })();
+</script>
+{% endblock %}
