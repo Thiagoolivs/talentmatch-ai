@@ -258,3 +258,37 @@ def admin_access(request):
             logger.warning(f"Failed admin access attempt from IP: {request.META.get('REMOTE_ADDR')}")
             messages.error(request, 'Codigo invalido.')
     return render(request, 'accounts/admin_access.html')
+
+
+@login_required
+def notifications_list(request):
+    from django.core.paginator import Paginator
+    from .models import Notification
+
+    if request.method == 'POST' and request.POST.get('action') == 'mark_all_read':
+        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        messages.success(request, 'Todas as notificações foram marcadas como lidas.')
+        return redirect('accounts:notifications')
+
+    notifications_qs = Notification.objects.filter(user=request.user)
+    paginator = Paginator(notifications_qs, 15)
+    page = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'accounts/notifications.html', {'notifications': page})
+
+
+@login_required
+def notification_open(request, pk):
+    from .models import Notification
+
+    notification = Notification.objects.filter(user=request.user, pk=pk).first()
+    if not notification:
+        return redirect('accounts:notifications')
+
+    if not notification.is_read:
+        notification.is_read = True
+        notification.save(update_fields=['is_read'])
+
+    if notification.link:
+        return redirect(notification.link)
+    return redirect('accounts:notifications')

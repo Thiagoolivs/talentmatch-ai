@@ -3,12 +3,17 @@
 {% block title %}{{ job.title }} - TalentMatch{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg shadow-md p-8 mb-6">
-        <div class="flex flex-col md:flex-row justify-between items-start mb-6">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ job.title }}</h1>
-                <p class="text-xl text-primary font-medium">
+<div class="max-w-4xl mx-auto px-4 py-10">
+    <a href="{% url 'jobs:list' %}" class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-brand-700 mb-6 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Voltar para vagas
+    </a>
+
+    <div class="card p-6 md:p-8 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+            <div class="min-w-0">
+                <h1 class="text-2xl md:text-3xl font-bold mb-2">{{ job.title }}</h1>
+                <p class="text-lg text-brand-700 font-semibold">
                     {% if job.company.company_profile %}
                         {{ job.company.company_profile.company_name }}
                     {% else %}
@@ -17,95 +22,102 @@
                 </p>
             </div>
             {% if match_score %}
-            <div class="mt-4 md:mt-0 text-center bg-blue-50 p-4 rounded-lg">
-                <p class="text-sm text-gray-600">Match Score</p>
-                <p class="text-3xl font-bold text-primary">{{ match_score|floatformat:0 }}%</p>
+            <div class="shrink-0 text-center bg-brand-50 border border-brand-100 px-6 py-4 rounded-2xl">
+                <p class="text-xs font-medium text-brand-600 uppercase tracking-wide mb-1">Match</p>
+                <p class="text-3xl font-extrabold text-brand-700">{{ match_score|floatformat:0 }}%</p>
             </div>
             {% endif %}
         </div>
-        
-        <div class="flex flex-wrap gap-3 mb-6">
-            <span class="px-4 py-2 bg-blue-100 text-primary rounded-full">{{ job.get_job_type_display }}</span>
-            <span class="px-4 py-2 bg-green-100 text-green-700 rounded-full">{{ job.get_work_mode_display }}</span>
-            <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full">{{ job.location }}</span>
+
+        <div class="flex flex-wrap gap-2 mb-6">
+            <span class="badge-blue !text-sm !px-3 !py-1">{{ job.get_job_type_display }}</span>
+            <span class="badge-green !text-sm !px-3 !py-1">{{ job.get_work_mode_display }}</span>
+            <span class="badge-gray !text-sm !px-3 !py-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                {{ job.location }}
+            </span>
             {% if job.experience_years %}
-            <span class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full">{{ job.experience_years }} ano(s) experiencia</span>
+            <span class="badge-yellow !text-sm !px-3 !py-1">{{ job.experience_years }} ano(s) de experiência</span>
             {% endif %}
         </div>
-        
+
         {% if job.salary_min or job.salary_max %}
-        <div class="mb-6">
-            <p class="text-2xl font-bold text-green-600">
+        <div class="mb-6 bg-emerald-50 border border-emerald-100 rounded-xl px-5 py-4 inline-block">
+            <p class="text-xs font-medium text-emerald-600 uppercase tracking-wide mb-0.5">Faixa Salarial</p>
+            <p class="text-xl font-bold text-emerald-700">
                 {% if job.salary_min and job.salary_max %}
                     R$ {{ job.salary_min|floatformat:0 }} - R$ {{ job.salary_max|floatformat:0 }}
                 {% elif job.salary_min %}
                     A partir de R$ {{ job.salary_min|floatformat:0 }}
                 {% else %}
-                    Ate R$ {{ job.salary_max|floatformat:0 }}
+                    Até R$ {{ job.salary_max|floatformat:0 }}
                 {% endif %}
             </p>
         </div>
         {% endif %}
-        
-        <div class="border-t pt-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Descricao da Vaga</h2>
-            <div class="text-gray-600 leading-relaxed whitespace-pre-line">{{ job.description }}</div>
+
+        <div class="border-t border-slate-100 pt-6">
+            <h2 class="text-lg font-bold mb-3">Descrição da Vaga</h2>
+            <div class="text-slate-600 leading-relaxed whitespace-pre-line">{{ job.description }}</div>
         </div>
-        
-        <div class="border-t pt-6 mt-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Requisitos</h2>
-            <div class="text-gray-600 leading-relaxed whitespace-pre-line">{{ job.requirements }}</div>
+
+        <div class="border-t border-slate-100 pt-6 mt-6">
+            <h2 class="text-lg font-bold mb-3">Requisitos</h2>
+            <div class="text-slate-600 leading-relaxed whitespace-pre-line">{{ job.requirements }}</div>
         </div>
-        
+
         {% if job.responsibilities %}
-        <div class="border-t pt-6 mt-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Responsabilidades</h2>
-            <div class="text-gray-600 leading-relaxed whitespace-pre-line">{{ job.responsibilities }}</div>
+        <div class="border-t border-slate-100 pt-6 mt-6">
+            <h2 class="text-lg font-bold mb-3">Responsabilidades</h2>
+            <div class="text-slate-600 leading-relaxed whitespace-pre-line">{{ job.responsibilities }}</div>
         </div>
         {% endif %}
-        
+
         {% if job.benefits %}
-        <div class="border-t pt-6 mt-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Beneficios</h2>
-            <div class="text-gray-600 leading-relaxed whitespace-pre-line">{{ job.benefits }}</div>
+        <div class="border-t border-slate-100 pt-6 mt-6">
+            <h2 class="text-lg font-bold mb-3">Benefícios</h2>
+            <div class="text-slate-600 leading-relaxed whitespace-pre-line">{{ job.benefits }}</div>
         </div>
         {% endif %}
     </div>
-    
-    <div class="bg-white rounded-lg shadow-md p-6">
+
+    <div class="card p-6">
         {% if user.is_authenticated %}
             {% if user.is_candidate %}
                 {% if has_applied %}
                 <div class="text-center">
-                    <p class="text-green-600 font-bold text-lg mb-2">Voce ja se candidatou a esta vaga!</p>
-                    <a href="{% url 'jobs:my_applications' %}" class="text-primary hover:underline">Ver minhas candidaturas</a>
+                    <div class="inline-flex items-center gap-2 text-emerald-600 font-semibold mb-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Você já se candidatou a esta vaga!
+                    </div>
+                    <div>
+                        <a href="{% url 'jobs:my_applications' %}" class="text-brand-700 text-sm font-medium hover:underline">Ver minhas candidaturas</a>
+                    </div>
                 </div>
                 {% else %}
                 <div class="text-center">
-                    <a href="{% url 'jobs:apply' job.pk %}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-primary-dark transition">
-                        Candidatar-se a esta Vaga
-                    </a>
+                    <a href="{% url 'jobs:apply' job.pk %}" class="btn-primary btn-lg">Candidatar-se a esta Vaga</a>
                 </div>
                 {% endif %}
             {% elif user.is_company and job.company == user %}
-                <div class="flex justify-center space-x-4">
-                    <a href="{% url 'jobs:edit' job.pk %}" class="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-primary-dark transition">
+                <div class="flex flex-col sm:flex-row justify-center gap-3">
+                    <a href="{% url 'jobs:edit' job.pk %}" class="btn-secondary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         Editar Vaga
                     </a>
-                    <a href="{% url 'jobs:applications' job.pk %}" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 transition">
+                    <a href="{% url 'jobs:applications' job.pk %}" class="btn-primary">
                         Ver Candidatos ({{ job.application_count }})
                     </a>
-                    <a href="{% url 'match:recommended_candidates' job.pk %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+                    <a href="{% url 'match:recommended_candidates' job.pk %}" class="btn-soft">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         Candidatos Recomendados
                     </a>
                 </div>
             {% endif %}
         {% else %}
         <div class="text-center">
-            <p class="text-gray-600 mb-4">Faca login para se candidatar a esta vaga</p>
-            <a href="{% url 'accounts:login' %}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-primary-dark transition">
-                Entrar
-            </a>
+            <p class="text-slate-500 mb-4">Faça login para se candidatar a esta vaga</p>
+            <a href="{% url 'accounts:login' %}" class="btn-primary btn-lg">Entrar</a>
         </div>
         {% endif %}
     </div>

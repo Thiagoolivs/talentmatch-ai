@@ -3,73 +3,84 @@
 {% block title %}Cursos - TalentMatch{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Cursos Disponiveis</h1>
+<div class="section-container py-10">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 page-header">
+        <div>
+            <h1 class="page-title">Cursos Disponíveis</h1>
+            <p class="page-subtitle">Desenvolva novas habilidades e destaque-se no mercado</p>
+        </div>
         {% if user.is_authenticated %}
-        <a href="{% url 'courses:my_courses' %}" class="mt-4 md:mt-0 text-primary font-medium hover:underline">Meus Cursos</a>
+        <a href="{% url 'courses:my_courses' %}" class="btn-secondary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            Meus Cursos
+        </a>
         {% endif %}
     </div>
-    
-    <div class="flex flex-wrap gap-4 mb-8">
-        <a href="{% url 'courses:list' %}" class="px-4 py-2 rounded-full {% if not selected_area %}bg-primary text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">Todos</a>
+
+    <div class="flex flex-wrap gap-2 mb-8 overflow-x-auto pb-1">
+        <a href="{% url 'courses:list' %}" class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if not selected_area %}bg-brand-700 text-white{% else %}bg-white border border-slate-200 text-slate-600 hover:border-brand-300 hover:text-brand-700{% endif %}">Todos</a>
         {% for value, label in areas %}
-        <a href="?area={{ value }}{% if selected_level %}&level={{ selected_level }}{% endif %}" class="px-4 py-2 rounded-full {% if selected_area == value %}bg-primary text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">{{ label }}</a>
+        <a href="?area={{ value }}{% if selected_level %}&level={{ selected_level }}{% endif %}" class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if selected_area == value %}bg-brand-700 text-white{% else %}bg-white border border-slate-200 text-slate-600 hover:border-brand-300 hover:text-brand-700{% endif %}">{{ label }}</a>
         {% endfor %}
     </div>
-    
+
     {% if courses %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for course in courses %}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-            <div class="h-40 bg-gradient-to-r from-primary to-primary-light flex items-center justify-center">
+        <div class="card-hover overflow-hidden flex flex-col">
+            <div class="h-40 gradient-bg hero-pattern flex items-center justify-center overflow-hidden">
                 {% if course.image %}
                 <img src="{{ course.image.url }}" alt="{{ course.title }}" class="w-full h-full object-cover">
                 {% else %}
-                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                <svg class="w-16 h-16 text-white/90" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                 </svg>
                 {% endif %}
             </div>
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="px-3 py-1 bg-blue-100 text-primary text-sm rounded-full">{{ course.get_area_display }}</span>
-                    <span class="text-gray-500 text-sm">{{ course.duration_hours }}h</span>
+            <div class="p-6 flex flex-col flex-grow">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="badge-blue">{{ course.get_area_display }}</span>
+                    <span class="text-slate-400 text-sm inline-flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        {{ course.duration_hours }}h
+                    </span>
                 </div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">{{ course.title }}</h3>
-                <p class="text-gray-600 text-sm mb-4">{{ course.description|truncatewords:15 }}</p>
-                <div class="flex items-center justify-between">
-                    <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">{{ course.get_level_display }}</span>
+                <h3 class="text-lg font-bold mb-2">{{ course.title }}</h3>
+                <p class="text-slate-500 text-sm mb-4 flex-grow">{{ course.description|truncatewords:15 }}</p>
+                <div class="flex items-center justify-between mb-4">
+                    <span class="badge-gray">{{ course.get_level_display }}</span>
                     {% if course.is_free %}
-                    <span class="text-green-600 font-bold">Gratis</span>
+                    <span class="text-emerald-600 font-bold text-sm">Grátis</span>
                     {% elif course.price %}
-                    <span class="text-green-600 font-bold">R$ {{ course.price|floatformat:2 }}</span>
+                    <span class="text-emerald-600 font-bold text-sm">R$ {{ course.price|floatformat:2 }}</span>
                     {% endif %}
                 </div>
-                <a href="{% url 'courses:detail' course.pk %}" class="block mt-4 text-center bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition">
-                    Ver Curso
-                </a>
+                <a href="{% url 'courses:detail' course.pk %}" class="btn-primary w-full">Ver Curso</a>
             </div>
         </div>
         {% endfor %}
     </div>
-    
+
     {% if courses.has_other_pages %}
     <div class="mt-8 flex justify-center">
-        <nav class="flex space-x-2">
+        <nav class="flex items-center gap-2">
             {% if courses.has_previous %}
-            <a href="?page={{ courses.previous_page_number }}" class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">Anterior</a>
+            <a href="?page={{ courses.previous_page_number }}" class="btn-secondary btn-sm !text-sm !px-4 !py-2">Anterior</a>
             {% endif %}
-            <span class="px-4 py-2 bg-primary text-white rounded-lg">{{ courses.number }} de {{ courses.paginator.num_pages }}</span>
+            <span class="px-4 py-2 text-sm font-medium text-slate-500">Página {{ courses.number }} de {{ courses.paginator.num_pages }}</span>
             {% if courses.has_next %}
-            <a href="?page={{ courses.next_page_number }}" class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">Proxima</a>
+            <a href="?page={{ courses.next_page_number }}" class="btn-secondary btn-sm !text-sm !px-4 !py-2">Próxima</a>
             {% endif %}
         </nav>
     </div>
     {% endif %}
     {% else %}
-    <div class="bg-white rounded-lg shadow-md p-8 text-center">
-        <p class="text-gray-600 text-lg">Nenhum curso encontrado.</p>
+    <div class="empty-state">
+        <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+            <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        </div>
+        <h3 class="text-lg font-bold mb-1">Nenhum curso encontrado</h3>
+        <p class="text-slate-500 text-sm">Tente selecionar outra área.</p>
     </div>
     {% endif %}
 </div>

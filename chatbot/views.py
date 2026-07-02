@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import ChatSession, ChatMessage
-from .ai_engine import get_ai_response
+from .ai_engine import get_ai_response, update_chat_memory
 
 
 @login_required
@@ -52,8 +52,13 @@ def send_message(request):
             role='assistant',
             content=ai_response
         )
-        
+
         session.save()
+
+        try:
+            update_chat_memory(request.user, session)
+        except Exception:
+            pass
         
         return JsonResponse({
             'response': ai_response,

@@ -68,6 +68,20 @@ def lesson_detail(request, course_pk, lesson_pk):
             user_course.status = 'in_progress'
             user_course.started_at = timezone.now()
             user_course.save()
+
+        # Avanço automático de progresso: abrir uma aula garante progresso
+        # proporcional à posição dela no curso (nunca regride).
+        total_lessons = lessons.count()
+        if total_lessons and user_course.status != 'completed':
+            position = lessons.filter(order__lte=lesson.order).count()
+            lesson_progress = int(position * 100 / total_lessons)
+            if lesson_progress > user_course.progress:
+                user_course.progress = lesson_progress
+                if lesson_progress >= 100:
+                    user_course.status = 'completed'
+                    user_course.completed_at = timezone.now()
+                    messages.success(request, f'Parabéns! Você concluiu o curso "{course.title}"!')
+                user_course.save()
     
     return render(request, 'courses/lesson_detail.html', {
         'course': course,

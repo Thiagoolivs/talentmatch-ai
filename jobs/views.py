@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.urls import reverse
 from .models import Job, Application
 from .forms import JobForm, ApplicationForm, ApplicationStatusForm
 from .filters import JobFilter
@@ -111,6 +112,17 @@ def job_apply(request, pk):
             application.candidate = request.user
             application.match_score = calculate_match_score(request.user, job)
             application.save()
+
+            from accounts.models import Notification
+            candidate_name = request.user.get_full_name() or request.user.username
+            Notification.notify_user(
+                user=job.company,
+                notification_type='new_application',
+                title='Nova candidatura recebida',
+                message=f'{candidate_name} se candidatou à vaga "{job.title}" com {int(application.match_score)}% de match.',
+                link=reverse('jobs:application_detail', args=[application.pk])
+            )
+
             messages.success(request, 'Candidatura enviada com sucesso!')
             return redirect('dashboard:index')
     else:
@@ -176,7 +188,7 @@ def application_detail(request, pk):
                     notification_type='application_status',
                     title='Status da candidatura atualizado',
                     message=f'O status da sua candidatura para "{application.job.title}" foi alterado para "{application.get_status_display()}".',
-                    link=f'/jobs/application/{application.pk}/'
+                    link=reverse('jobs:application_detail', args=[application.pk])
                 )
             
             messages.success(request, 'Status da candidatura atualizado!')

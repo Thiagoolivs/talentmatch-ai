@@ -3,74 +3,82 @@
 {% block title %}Matching - TalentMatch{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">Sistema de Matching</h1>
-    
+<div class="max-w-5xl mx-auto px-4 py-10">
+    <div class="page-header">
+        <h1 class="page-title">Sistema de Matching</h1>
+        <p class="page-subtitle">Recomendações geradas por IA a partir do seu perfil</p>
+    </div>
+
     {% if user.is_candidate %}
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold text-gray-800">Vagas Recomendadas</h2>
-            <a href="{% url 'match:recommended_jobs' %}" class="text-primary hover:underline">Ver todas</a>
+    <div class="card p-6 md:p-8 mb-6">
+        <div class="flex justify-between items-center mb-5">
+            <h2 class="text-lg font-bold">Vagas Recomendadas</h2>
+            <a href="{% url 'match:recommended_jobs' %}" class="text-brand-700 text-sm font-semibold hover:underline">Ver todas</a>
         </div>
         {% if recommendations %}
-        <div class="space-y-4">
+        <div class="space-y-3">
             {% for rec in recommendations %}
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                    <a href="{% url 'jobs:detail' rec.job.pk %}" class="font-medium text-gray-800 hover:text-primary">{{ rec.job.title }}</a>
-                    <p class="text-gray-500 text-sm">{{ rec.job.location }}</p>
+            <div class="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl hover:border-brand-200 transition-colors">
+                <div class="min-w-0">
+                    <a href="{% url 'jobs:detail' rec.job.pk %}" class="font-semibold text-slate-800 hover:text-brand-700 transition-colors">{{ rec.job.title }}</a>
+                    <p class="text-slate-400 text-sm">{{ rec.job.location }}</p>
                 </div>
-                <span class="px-3 py-1 bg-primary text-white rounded-full">{{ rec.score|floatformat:0 }}%</span>
+                <span class="shrink-0 px-3 py-1 bg-brand-700 text-white text-sm font-bold rounded-full">{{ rec.score|floatformat:0 }}%</span>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-gray-500 text-center py-4">Complete seu perfil para ver recomendacoes</p>
+        <p class="text-slate-400 text-center py-6">Complete seu perfil para ver recomendações</p>
         {% endif %}
     </div>
-    
+
     {% if skill_gaps %}
-    <div class="bg-yellow-50 rounded-lg p-6">
-        <h3 class="text-lg font-bold text-yellow-800 mb-4">Habilidades em Demanda</h3>
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6">
+        <h3 class="text-base font-bold text-amber-800 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            Habilidades em Demanda
+        </h3>
         <div class="flex flex-wrap gap-2">
             {% for skill in skill_gaps %}
-            <span class="px-3 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm">{{ skill }}</span>
+            <span class="badge-yellow">{{ skill }}</span>
             {% endfor %}
         </div>
     </div>
     {% endif %}
     {% endif %}
-    
+
     {% if user.is_company %}
-    <div class="space-y-8">
+    <div class="space-y-6">
         {% for item in job_recommendations %}
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800">{{ item.job.title }}</h2>
-                <a href="{% url 'match:recommended_candidates' item.job.pk %}" class="text-primary hover:underline">Ver todos</a>
+        <div class="card p-6 md:p-8">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-lg font-bold">{{ item.job.title }}</h2>
+                <a href="{% url 'match:recommended_candidates' item.job.pk %}" class="text-brand-700 text-sm font-semibold hover:underline">Ver todos</a>
             </div>
             {% if item.candidates %}
             <div class="space-y-3">
                 {% for rec in item.candidates %}
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                        <p class="font-medium text-gray-800">{{ rec.candidate.get_full_name|default:rec.candidate.username }}</p>
-                        <p class="text-gray-500 text-sm">{{ rec.candidate.email }}</p>
+                <div class="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div class="min-w-0">
+                        <p class="font-semibold text-slate-800 truncate">{{ rec.candidate.get_full_name|default:rec.candidate.username }}</p>
+                        <p class="text-slate-400 text-sm truncate">{{ rec.candidate.email }}</p>
                     </div>
-                    <span class="px-3 py-1 bg-primary text-white rounded-full">{{ rec.score|floatformat:0 }}%</span>
+                    <span class="shrink-0 px-3 py-1 bg-brand-700 text-white text-sm font-bold rounded-full">{{ rec.score|floatformat:0 }}%</span>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <p class="text-gray-500 text-center py-4">Nenhum candidato recomendado</p>
+            <p class="text-slate-400 text-center py-6">Nenhum candidato recomendado</p>
             {% endif %}
         </div>
         {% empty %}
-        <div class="bg-white rounded-lg shadow-md p-8 text-center">
-            <p class="text-gray-600 text-lg mb-4">Publique vagas para receber recomendacoes de candidatos.</p>
-            <a href="{% url 'jobs:create' %}" class="inline-block bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
-                Publicar Vaga
-            </a>
+        <div class="empty-state">
+            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+            <h3 class="text-lg font-bold mb-1">Nenhuma vaga publicada</h3>
+            <p class="text-slate-500 text-sm mb-5">Publique vagas para receber recomendações de candidatos.</p>
+            <a href="{% url 'jobs:create' %}" class="btn-primary">Publicar Vaga</a>
         </div>
         {% endfor %}
     </div>
