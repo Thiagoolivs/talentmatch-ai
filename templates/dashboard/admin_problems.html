@@ -3,102 +3,86 @@
 {% block title %}Gerenciar Problemas - Admin{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Gerenciar Problemas Reportados</h1>
-        <a href="{% url 'dashboard:index' %}" class="text-primary hover:text-primary-dark">
+<div class="max-w-6xl mx-auto px-4 py-10">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 page-header">
+        <div>
+            <h1 class="page-title">Gerenciar Problemas Reportados</h1>
+            <p class="page-subtitle">Acompanhe e resolva os problemas enviados pelos usuários</p>
+        </div>
+        <a href="{% url 'dashboard:index' %}" class="btn-secondary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
             Voltar ao Dashboard
         </a>
     </div>
-    
-    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div class="flex flex-wrap gap-2">
-            <a href="?status=open" class="px-4 py-2 rounded-lg {% if status_filter == 'open' %}bg-yellow-100 text-yellow-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
-                Abertos
-            </a>
-            <a href="?status=in_progress" class="px-4 py-2 rounded-lg {% if status_filter == 'in_progress' %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
-                Em Andamento
-            </a>
-            <a href="?status=resolved" class="px-4 py-2 rounded-lg {% if status_filter == 'resolved' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
-                Resolvidos
-            </a>
-            <a href="?status=closed" class="px-4 py-2 rounded-lg {% if status_filter == 'closed' %}bg-gray-200 text-gray-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
-                Fechados
-            </a>
-            <a href="?status=all" class="px-4 py-2 rounded-lg {% if status_filter == 'all' %}bg-primary text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
-                Todos
-            </a>
-        </div>
+
+    <div class="flex flex-wrap gap-2 mb-6">
+        <a href="?status=open" class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if status_filter == 'open' %}bg-amber-100 text-amber-800 ring-1 ring-amber-300{% else %}bg-white border border-slate-200 text-slate-600 hover:border-amber-300{% endif %}">Abertos</a>
+        <a href="?status=in_progress" class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if status_filter == 'in_progress' %}bg-blue-100 text-blue-800 ring-1 ring-blue-300{% else %}bg-white border border-slate-200 text-slate-600 hover:border-blue-300{% endif %}">Em Andamento</a>
+        <a href="?status=resolved" class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if status_filter == 'resolved' %}bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300{% else %}bg-white border border-slate-200 text-slate-600 hover:border-emerald-300{% endif %}">Resolvidos</a>
+        <a href="?status=closed" class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if status_filter == 'closed' %}bg-slate-200 text-slate-800 ring-1 ring-slate-300{% else %}bg-white border border-slate-200 text-slate-600 hover:border-slate-300{% endif %}">Fechados</a>
+        <a href="?status=all" class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if status_filter == 'all' %}bg-brand-700 text-white{% else %}bg-white border border-slate-200 text-slate-600 hover:border-brand-300{% endif %}">Todos</a>
     </div>
-    
+
     {% if problems %}
     <div class="space-y-4">
         {% for problem in problems %}
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <div class="flex items-center space-x-2 mb-2">
-                        <span class="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                            {{ problem.get_category_display }}
-                        </span>
-                        <span class="px-2 py-1 rounded text-xs font-medium
-                            {% if problem.priority == 'low' %}bg-gray-100 text-gray-600
-                            {% elif problem.priority == 'medium' %}bg-yellow-100 text-yellow-800
-                            {% elif problem.priority == 'high' %}bg-orange-100 text-orange-800
-                            {% else %}bg-red-100 text-red-800{% endif %}">
+        <div class="card p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span class="badge-gray">{{ problem.get_category_display }}</span>
+                        <span class="{% if problem.priority == 'low' %}badge-gray{% elif problem.priority == 'medium' %}badge-yellow{% elif problem.priority == 'high' %}badge bg-orange-50 text-orange-600 ring-1 ring-inset ring-orange-200{% else %}badge-red{% endif %}">
                             {{ problem.get_priority_display }}
                         </span>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-800">{{ problem.title }}</h3>
-                    <p class="text-sm text-gray-500">
+                    <h3 class="text-lg font-bold">{{ problem.title }}</h3>
+                    <p class="text-sm text-slate-400">
                         Por {{ problem.user.username }} em {{ problem.created_at|date:"d/m/Y H:i" }}
                     </p>
                 </div>
-                <span class="px-3 py-1 rounded-full text-sm font-medium
-                    {% if problem.status == 'open' %}bg-yellow-100 text-yellow-800
-                    {% elif problem.status == 'in_progress' %}bg-blue-100 text-blue-800
-                    {% elif problem.status == 'resolved' %}bg-green-100 text-green-800
-                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                <span class="shrink-0 {% if problem.status == 'open' %}badge-yellow{% elif problem.status == 'in_progress' %}badge-blue{% elif problem.status == 'resolved' %}badge-green{% else %}badge-gray{% endif %} !text-sm !px-3 !py-1">
                     {{ problem.get_status_display }}
                 </span>
             </div>
-            
-            <p class="text-gray-600 mb-4">{{ problem.description }}</p>
-            
+
+            <p class="text-sm text-slate-600 mb-4 leading-relaxed">{{ problem.description }}</p>
+
             {% if problem.admin_notes %}
-            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                <p class="text-sm font-medium text-gray-700 mb-1">Notas do Admin:</p>
-                <p class="text-sm text-gray-600">{{ problem.admin_notes }}</p>
+            <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 mb-4">
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Notas do Admin</p>
+                <p class="text-sm text-slate-600">{{ problem.admin_notes }}</p>
             </div>
             {% endif %}
-            
-            <div class="pt-4 border-t">
+
+            <div class="pt-4 border-t border-slate-100">
                 <form method="post" action="{% url 'dashboard:update_problem' problem.id %}" class="flex flex-wrap items-end gap-4">
                     {% csrf_token %}
-                    <div class="flex-grow">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <div class="flex-grow min-w-[160px]">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="input-field">
                             <option value="open" {% if problem.status == 'open' %}selected{% endif %}>Aberto</option>
                             <option value="in_progress" {% if problem.status == 'in_progress' %}selected{% endif %}>Em Andamento</option>
                             <option value="resolved" {% if problem.status == 'resolved' %}selected{% endif %}>Resolvido</option>
                             <option value="closed" {% if problem.status == 'closed' %}selected{% endif %}>Fechado</option>
                         </select>
                     </div>
-                    <div class="flex-grow">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Notas</label>
-                        <input type="text" name="notes" value="{{ problem.admin_notes }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Adicionar notas...">
+                    <div class="flex-grow min-w-[200px]">
+                        <label class="form-label">Notas</label>
+                        <input type="text" name="notes" value="{{ problem.admin_notes }}" class="input-field" placeholder="Adicionar notas...">
                     </div>
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition">
-                        Atualizar
-                    </button>
+                    <button type="submit" class="btn-primary">Atualizar</button>
                 </form>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="bg-white rounded-lg shadow-md p-8 text-center">
-        <p class="text-gray-600">Nenhum problema encontrado com este filtro.</p>
+    <div class="empty-state">
+        <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+            <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3 class="text-lg font-bold mb-1">Nenhum problema encontrado</h3>
+        <p class="text-slate-500 text-sm">Nenhum problema encontrado com este filtro.</p>
     </div>
     {% endif %}
 </div>

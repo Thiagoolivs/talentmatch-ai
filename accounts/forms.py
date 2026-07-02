@@ -51,7 +51,7 @@ class CandidateRegistrationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            field.widget.attrs['class'] = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            field.widget.attrs['class'] = 'input-field'
         
         self.fields['password1'].help_text = 'Minimo 8 caracteres, com letras e numeros.'
         self.fields['password2'].help_text = 'Digite a mesma senha novamente.'
@@ -112,7 +112,7 @@ class CompanyRegistrationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            field.widget.attrs['class'] = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            field.widget.attrs['class'] = 'input-field'
         
         self.fields['cnpj'].widget.attrs['placeholder'] = 'XX.XXX.XXX/XXXX-XX'
     
@@ -145,7 +145,7 @@ class CustomLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            field.widget.attrs['class'] = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            field.widget.attrs['class'] = 'input-field'
         
         self.fields['username'].label = 'Usuario ou Email'
         self.fields['password'].label = 'Senha'
@@ -171,7 +171,7 @@ class CandidateProfileForm(forms.ModelForm):
             'skills': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Python, JavaScript, React, Django...'}),
             'experience': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Descreva sua experiencia profissional...'}),
             'education': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Sua formacao academica...'}),
-            'state': forms.Select(attrs={'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg'}),
+            'state': forms.Select(attrs={'class': 'input-field'}),
             'interest_area': forms.TextInput(attrs={'placeholder': 'Ex: Desenvolvimento Web, Data Science...'}),
         }
         labels = {
@@ -197,7 +197,7 @@ class CandidateProfileForm(forms.ModelForm):
         for field in self.fields.values():
             if not isinstance(field.widget, forms.CheckboxInput):
                 if 'class' not in field.widget.attrs:
-                    field.widget.attrs['class'] = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    field.widget.attrs['class'] = 'input-field'
         self.fields['city'].required = True
         self.fields['state'].required = True
         self.fields['bio'].help_text = 'Minimo 20 caracteres, maximo 1000 caracteres.'
@@ -289,7 +289,7 @@ class CompanyProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            field.widget.attrs['class'] = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            field.widget.attrs['class'] = 'input-field'
     
     def clean_logo(self):
         logo = self.cleaned_data.get('logo')
@@ -315,7 +315,7 @@ class UserUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            field.widget.attrs['class'] = 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            field.widget.attrs['class'] = 'input-field'
         self.fields['phone'].widget.attrs['placeholder'] = '(XX) XXXXX-XXXX'
         self.fields['phone'].help_text = 'Formato: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX'
     

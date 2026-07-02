@@ -3,68 +3,90 @@
 {% block title %}TalentMatch - Conecte seu Talento{% endblock %}
 
 {% block content %}
-<section class="gradient-bg text-white py-20">
-    <div class="max-w-7xl mx-auto px-4 text-center">
-        <h1 class="text-4xl md:text-6xl font-bold mb-6">Encontre a Oportunidade Perfeita</h1>
-        <p class="text-xl md:text-2xl mb-8 opacity-90">Conectamos talentos a empresas usando inteligencia artificial</p>
+<section class="gradient-bg relative overflow-hidden">
+    <div class="hero-pattern absolute inset-0"></div>
+    <div class="section-container relative py-24 md:py-32 text-center">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white/90 text-sm font-medium ring-1 ring-white/20 mb-6">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Matching com Inteligência Artificial
+        </span>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
+            Encontre a oportunidade<br class="hidden md:block"> <span class="text-brand-300">perfeita para você</span>
+        </h1>
+        <p class="text-lg md:text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+            Conectamos talentos a empresas usando inteligência artificial que entende seu perfil, suas habilidades e seus objetivos.
+        </p>
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="{% url 'jobs:list' %}" class="bg-white text-primary px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
+            <a href="{% url 'jobs:list' %}" class="btn-lg btn bg-white text-brand-800 hover:bg-blue-50 shadow-lg font-bold">
                 Buscar Vagas
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
             {% if not user.is_authenticated %}
-            <a href="{% url 'accounts:register' %}" class="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-primary transition">
-                Criar Conta
+            <a href="{% url 'accounts:register' %}" class="btn-lg btn border-2 border-white/60 text-white hover:bg-white/10 font-bold">
+                Criar Conta Grátis
             </a>
             {% endif %}
         </div>
     </div>
 </section>
 
-<section class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div class="p-6">
-                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+<section class="py-16 md:py-20 bg-white">
+    <div class="section-container">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card p-8 text-center">
+                <div class="w-14 h-14 bg-brand-50 text-brand-700 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold mb-2">{{ stats.jobs }}+ Vagas</h3>
-                <p class="text-gray-600">Oportunidades em diversas areas esperando por voce</p>
+                <p class="text-3xl font-extrabold text-slate-900 mb-1">{{ stats.jobs }}+</p>
+                <h3 class="text-base font-semibold text-slate-900 mb-2">Vagas Abertas</h3>
+                <p class="text-sm text-slate-500">Oportunidades em diversas áreas esperando por você</p>
             </div>
-            <div class="p-6">
-                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            <div class="card p-8 text-center">
+                <div class="w-14 h-14 bg-brand-50 text-brand-700 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold mb-2">Match Inteligente</h3>
-                <p class="text-gray-600">IA que encontra as melhores oportunidades para seu perfil</p>
+                <p class="text-3xl font-extrabold text-slate-900 mb-1">IA</p>
+                <h3 class="text-base font-semibold text-slate-900 mb-2">Match Inteligente</h3>
+                <p class="text-sm text-slate-500">Algoritmo que encontra as melhores oportunidades para o seu perfil</p>
             </div>
-            <div class="p-6">
-                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            <div class="card p-8 text-center">
+                <div class="w-14 h-14 bg-brand-50 text-brand-700 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold mb-2">{{ stats.courses }}+ Cursos</h3>
-                <p class="text-gray-600">Desenvolva suas habilidades com cursos recomendados</p>
+                <p class="text-3xl font-extrabold text-slate-900 mb-1">{{ stats.courses }}+</p>
+                <h3 class="text-base font-semibold text-slate-900 mb-2">Cursos Gratuitos</h3>
+                <p class="text-sm text-slate-500">Desenvolva suas habilidades com cursos recomendados pela IA</p>
             </div>
         </div>
     </div>
 </section>
 
 {% if featured_jobs %}
-<section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-12">Vagas em Destaque</h2>
+<section class="py-16 md:py-20 bg-slate-50">
+    <div class="section-container">
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-bold">Vagas em Destaque</h2>
+                <p class="text-slate-500 mt-2">Oportunidades selecionadas para você começar</p>
+            </div>
+            <a href="{% url 'jobs:list' %}" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800">
+                Ver todas
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for job in featured_jobs %}
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-800">{{ job.title }}</h3>
-                        <p class="text-primary">
+            <div class="card-hover p-6 flex flex-col">
+                <div class="flex justify-between items-start gap-3 mb-4">
+                    <div class="min-w-0">
+                        <h3 class="text-lg font-bold text-slate-900 truncate">{{ job.title }}</h3>
+                        <p class="text-sm font-medium text-brand-700">
                             {% if job.company.company_profile %}
                                 {{ job.company.company_profile.company_name }}
                             {% else %}
@@ -72,66 +94,72 @@
                             {% endif %}
                         </p>
                     </div>
-                    <span class="px-3 py-1 bg-blue-100 text-primary text-sm rounded-full">{{ job.get_job_type_display }}</span>
+                    <span class="badge-blue shrink-0">{{ job.get_job_type_display }}</span>
                 </div>
-                <p class="text-gray-600 mb-4">{{ job.description|truncatewords:20 }}</p>
-                <div class="flex items-center text-gray-500 text-sm mb-4">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <p class="text-sm text-slate-500 mb-4 flex-grow">{{ job.description|truncatewords:20 }}</p>
+                <div class="flex items-center text-slate-400 text-sm mb-5">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    {{ job.location }}
-                    <span class="mx-2">|</span>
-                    {{ job.get_work_mode_display }}
+                    <span class="truncate">{{ job.location }}</span>
+                    <span class="mx-2 text-slate-300">&bull;</span>
+                    <span>{{ job.get_work_mode_display }}</span>
                 </div>
-                <a href="{% url 'jobs:detail' job.pk %}" class="block text-center bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition">
-                    Ver Detalhes
-                </a>
+                <a href="{% url 'jobs:detail' job.pk %}" class="btn-primary w-full">Ver Detalhes</a>
             </div>
             {% endfor %}
         </div>
-        <div class="text-center mt-8">
-            <a href="{% url 'jobs:list' %}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
-                Ver Todas as Vagas
-            </a>
+        <div class="text-center mt-10 sm:hidden">
+            <a href="{% url 'jobs:list' %}" class="btn-secondary">Ver Todas as Vagas</a>
         </div>
     </div>
 </section>
 {% endif %}
 
 {% if featured_courses %}
-<section class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-12">Cursos Recomendados</h2>
+<section class="py-16 md:py-20 bg-white">
+    <div class="section-container">
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-bold">Cursos Recomendados</h2>
+                <p class="text-slate-500 mt-2">Aprenda novas habilidades e aumente suas chances</p>
+            </div>
+            <a href="{% url 'courses:list' %}" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800">
+                Ver todos
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {% for course in featured_courses %}
-            <div class="bg-gray-50 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-                <div class="h-32 bg-gradient-to-r from-primary to-primary-light flex items-center justify-center">
-                    <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            <a href="{% url 'courses:detail' course.pk %}" class="card-hover overflow-hidden group">
+                <div class="h-32 gradient-bg hero-pattern flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white/90 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                 </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-gray-800 mb-2">{{ course.title }}</h3>
-                    <div class="flex items-center text-sm text-gray-500 mb-3">
-                        <span class="px-2 py-1 bg-blue-100 text-primary rounded">{{ course.get_level_display }}</span>
-                        <span class="ml-2">{{ course.duration_hours }}h</span>
+                <div class="p-5">
+                    <h3 class="font-bold text-slate-900 mb-3 group-hover:text-brand-700 transition-colors">{{ course.title }}</h3>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="badge-blue">{{ course.get_level_display }}</span>
+                        <span class="text-slate-400">{{ course.duration_hours }}h</span>
                     </div>
-                    <a href="{% url 'courses:detail' course.pk %}" class="text-primary font-medium hover:underline">Ver Curso</a>
                 </div>
-            </div>
+            </a>
             {% endfor %}
         </div>
     </div>
 </section>
 {% endif %}
 
-<section class="gradient-bg text-white py-16">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold mb-6">Precisa de Ajuda com seu Curriculo?</h2>
-        <p class="text-xl mb-8 opacity-90">Nosso assistente de IA pode analisar seu perfil, recomendar cursos e encontrar as melhores vagas para voce!</p>
-        <a href="{% url 'chatbot:chat' %}" class="inline-block bg-white text-primary px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
-            Conversar com IA
+<section class="gradient-bg relative overflow-hidden">
+    <div class="hero-pattern absolute inset-0"></div>
+    <div class="max-w-4xl mx-auto px-4 relative py-16 md:py-20 text-center">
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">Precisa de ajuda com seu currículo?</h2>
+        <p class="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">Nosso assistente de IA pode analisar seu perfil, recomendar cursos e encontrar as melhores vagas para você.</p>
+        <a href="{% url 'chatbot:chat' %}" class="btn-lg btn bg-white text-brand-800 hover:bg-blue-50 shadow-lg font-bold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+            Conversar com a IA
         </a>
     </div>
 </section>

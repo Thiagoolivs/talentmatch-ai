@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manutencao - TalentMatch</title>
+    <title>Manutenção - TalentMatch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
                     colors: {
                         primary: '#005BBB',
                         'primary-dark': '#004a99',
@@ -18,42 +22,44 @@
         }
     </script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+<body class="bg-slate-50 min-h-screen flex items-center justify-center font-sans antialiased">
     <div class="max-w-md w-full mx-4">
-        <div class="bg-white rounded-lg shadow-lg p-8 text-center">
-            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+        <div class="flex items-center justify-center gap-2.5 mb-8">
+            <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-900 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </span>
+            <span class="text-2xl font-bold tracking-tight text-slate-900">Talent<span class="text-primary">Match</span></span>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-lg p-8 text-center">
+            <div class="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
             </div>
-            
-            <h1 class="text-2xl font-bold text-gray-800 mb-4">Site em Manutencao</h1>
-            
-            <p class="text-gray-600 mb-6">{{ message }}</p>
-            
+
+            <h1 class="text-2xl font-bold text-slate-900 mb-3">Site em Manutenção</h1>
+
+            <p class="text-slate-500 mb-6">{{ message }}</p>
+
             {% if end_time %}
-            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
                 <p class="text-sm text-blue-800">
-                    <strong>Previsao de retorno:</strong><br>
+                    <strong>Previsão de retorno:</strong><br>
                     {{ end_time|date:"d/m/Y H:i" }}
                 </p>
             </div>
             {% endif %}
-            
-            <div class="text-gray-500 text-sm">
-                <p>Pedimos desculpas pelo inconveniente.</p>
-                <p>Em breve estaremos de volta!</p>
-            </div>
-            
-            <div class="mt-8">
-                <a href="/" class="text-primary hover:text-primary-dark">
-                    Tentar novamente
-                </a>
-            </div>
-        </div>
-        
-        <div class="text-center mt-6 text-gray-500 text-sm">
-            TalentMatch
+
+            <p class="text-slate-400 text-sm mb-8">Pedimos desculpas pelo inconveniente.<br>Em breve estaremos de volta!</p>
+
+            <a href="/" class="inline-flex items-center justify-center gap-2 font-semibold rounded-lg px-5 py-2.5 text-sm bg-primary text-white hover:bg-primary-dark transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Tentar novamente
+            </a>
         </div>
     </div>
 </body>

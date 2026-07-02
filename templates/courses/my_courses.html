@@ -3,59 +3,62 @@
 {% block title %}Meus Cursos - TalentMatch{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">Meus Cursos</h1>
-    
+<div class="max-w-5xl mx-auto px-4 py-10">
+    <div class="page-header">
+        <h1 class="page-title">Meus Cursos</h1>
+        <p class="page-subtitle">Continue de onde parou</p>
+    </div>
+
     {% if in_progress %}
     <div class="mb-12">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Em Andamento</h2>
+        <h2 class="text-lg font-bold mb-4">Em Andamento</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {% for uc in in_progress %}
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-2">{{ uc.course.title }}</h3>
-                <p class="text-gray-600 text-sm mb-4">{{ uc.course.get_area_display }} | {{ uc.course.duration_hours }}h</p>
-                <div class="mb-4">
-                    <div class="flex justify-between text-sm mb-1">
-                        <span>Progresso</span>
-                        <span class="font-bold text-primary">{{ uc.progress }}%</span>
+            <div class="card-hover p-6">
+                <h3 class="text-lg font-bold mb-1">{{ uc.course.title }}</h3>
+                <p class="text-slate-400 text-sm mb-5">{{ uc.course.get_area_display }} &bull; {{ uc.course.duration_hours }}h</p>
+                <div class="mb-5">
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-slate-500">Progresso</span>
+                        <span class="font-bold text-brand-700">{{ uc.progress }}%</span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-primary h-2 rounded-full" style="width: {{ uc.progress }}%"></div>
+                    <div class="w-full bg-slate-100 rounded-full h-2.5">
+                        <div class="bg-gradient-to-r from-brand-500 to-brand-700 h-2.5 rounded-full" style="width: {{ uc.progress }}%"></div>
                     </div>
                 </div>
-                <a href="{% url 'courses:detail' uc.course.pk %}" class="block text-center bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition">
-                    Continuar
-                </a>
+                <a href="{% url 'courses:detail' uc.course.pk %}" class="btn-primary w-full">Continuar</a>
             </div>
             {% endfor %}
         </div>
     </div>
     {% endif %}
-    
+
     {% if completed %}
     <div>
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Concluidos</h2>
+        <h2 class="text-lg font-bold mb-4">Concluídos</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {% for uc in completed %}
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-lg font-bold text-gray-800">{{ uc.course.title }}</h3>
-                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">Concluido</span>
+            <div class="card p-6">
+                <div class="flex items-center justify-between gap-3 mb-2">
+                    <h3 class="text-lg font-bold truncate">{{ uc.course.title }}</h3>
+                    <span class="badge-green shrink-0">Concluído</span>
                 </div>
-                <p class="text-gray-600 text-sm mb-2">{{ uc.course.get_area_display }} | {{ uc.course.duration_hours }}h</p>
-                <p class="text-gray-500 text-sm">Concluido em {{ uc.completed_at|date:"d/m/Y" }}</p>
+                <p class="text-slate-400 text-sm mb-1">{{ uc.course.get_area_display }} &bull; {{ uc.course.duration_hours }}h</p>
+                <p class="text-slate-400 text-sm">Concluído em {{ uc.completed_at|date:"d/m/Y" }}</p>
             </div>
             {% endfor %}
         </div>
     </div>
     {% endif %}
-    
+
     {% if not in_progress and not completed %}
-    <div class="bg-white rounded-lg shadow-md p-8 text-center">
-        <p class="text-gray-600 text-lg mb-4">Voce ainda nao iniciou nenhum curso.</p>
-        <a href="{% url 'courses:list' %}" class="inline-block bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
-            Explorar Cursos
-        </a>
+    <div class="empty-state">
+        <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+            <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        </div>
+        <h3 class="text-lg font-bold mb-1">Nenhum curso iniciado</h3>
+        <p class="text-slate-500 text-sm mb-5">Você ainda não iniciou nenhum curso.</p>
+        <a href="{% url 'courses:list' %}" class="btn-primary">Explorar Cursos</a>
     </div>
     {% endif %}
 </div>

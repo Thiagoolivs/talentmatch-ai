@@ -3,151 +3,164 @@
 {% block title %}Meu Perfil - TalentMatch{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">Meu Perfil</h1>
-    
+<div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="page-header">
+        <h1 class="page-title">Meu Perfil</h1>
+        <p class="page-subtitle">Mantenha seus dados atualizados para melhorar seus matches</p>
+    </div>
+
     {% if profile_incomplete %}
-    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                </svg>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm text-yellow-700">
-                    <strong>Perfil incompleto!</strong> Complete os campos obrigatorios para melhorar suas chances de match.
-                </p>
-            </div>
-        </div>
+    <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+        <svg class="h-5 w-5 text-amber-500 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+        </svg>
+        <p class="text-sm text-amber-800">
+            <strong>Perfil incompleto!</strong> Complete os campos obrigatórios para melhorar suas chances de match.
+        </p>
     </div>
     {% endif %}
-    
-    <form method="post" enctype="multipart/form-data" class="space-y-8">
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
-        
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Informacoes Pessoais</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div class="card p-6 md:p-8">
+            <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </span>
+                Informações Pessoais
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Nome</label>
+                    <label class="form-label">Nome</label>
                     {{ user_form.first_name }}
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Sobrenome</label>
+                    <label class="form-label">Sobrenome</label>
                     {{ user_form.last_name }}
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Email</label>
+                    <label class="form-label">Email</label>
                     {{ user_form.email }}
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Telefone</label>
+                    <label class="form-label">Telefone</label>
                     {{ user_form.phone }}
-                    <p class="text-gray-500 text-sm mt-1">Formato: (XX) XXXXX-XXXX</p>
+                    <p class="form-help">Formato: (XX) XXXXX-XXXX</p>
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Idade</label>
+                    <label class="form-label">Idade</label>
                     {{ profile_form.age }}
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-gray-700 font-medium mb-2">Foto de Perfil</label>
+                    <label class="form-label">Foto de Perfil</label>
                     {{ user_form.avatar }}
                 </div>
             </div>
         </div>
-        
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Localizacao <span class="text-red-500">*</span></h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div class="card p-6 md:p-8">
+            <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </span>
+                Localização <span class="text-red-500">*</span>
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Cidade <span class="text-red-500">*</span></label>
+                    <label class="form-label">Cidade <span class="text-red-500">*</span></label>
                     {{ profile_form.city }}
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Estado <span class="text-red-500">*</span></label>
+                    <label class="form-label">Estado <span class="text-red-500">*</span></label>
                     {{ profile_form.state }}
                 </div>
             </div>
         </div>
-        
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Perfil Profissional</h2>
-            
-            <div class="space-y-4">
+
+        <div class="card p-6 md:p-8">
+            <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </span>
+                Perfil Profissional
+            </h2>
+
+            <div class="space-y-5">
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Resumo Profissional</label>
+                    <label class="form-label">Resumo Profissional</label>
                     {{ profile_form.bio }}
-                    <p class="text-gray-500 text-sm mt-1">Minimo 20 caracteres, maximo 500 caracteres.</p>
+                    <p class="form-help">Mínimo 20 caracteres, máximo 500 caracteres.</p>
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Habilidades (separadas por virgula)</label>
+                    <label class="form-label">Habilidades (separadas por vírgula)</label>
                     {{ profile_form.skills }}
-                    <p class="text-gray-500 text-sm mt-1">Ex: Python, JavaScript, React, Django, SQL...</p>
+                    <p class="form-help">Ex: Python, JavaScript, React, Django, SQL...</p>
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Area de Interesse</label>
+                    <label class="form-label">Área de Interesse</label>
                     {{ profile_form.interest_area }}
-                    <p class="text-gray-500 text-sm mt-1">Ex: Desenvolvimento Web, Data Science, DevOps...</p>
+                    <p class="form-help">Ex: Desenvolvimento Web, Data Science, DevOps...</p>
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Experiencia Profissional</label>
+                    <label class="form-label">Experiência Profissional</label>
                     {{ profile_form.experience }}
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-gray-700 font-medium mb-2">Anos de Experiencia</label>
+                        <label class="form-label">Anos de Experiência</label>
                         {{ profile_form.experience_years }}
                     </div>
                     <div>
-                        <label class="block text-gray-700 font-medium mb-2">Pretensao Salarial</label>
+                        <label class="form-label">Pretensão Salarial</label>
                         {{ profile_form.desired_salary }}
                     </div>
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Formacao Academica</label>
+                    <label class="form-label">Formação Acadêmica</label>
                     {{ profile_form.education }}
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Curriculo (PDF)</label>
+                    <label class="form-label">Currículo (PDF)</label>
                     {{ profile_form.resume }}
-                    <p class="text-gray-500 text-sm mt-1">Maximo 5MB, apenas PDF.</p>
+                    <p class="form-help">Máximo 5MB, apenas PDF.</p>
                 </div>
             </div>
         </div>
-        
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Links Profissionais</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <div class="card p-6 md:p-8">
+            <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                </span>
+                Links Profissionais
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">LinkedIn</label>
+                    <label class="form-label">LinkedIn</label>
                     {{ profile_form.linkedin_url }}
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">GitHub</label>
+                    <label class="form-label">GitHub</label>
                     {{ profile_form.github_url }}
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Portfolio</label>
+                    <label class="form-label">Portfólio</label>
                     {{ profile_form.portfolio_url }}
                 </div>
             </div>
-            
-            <div class="mt-4">
-                <label class="flex items-center">
-                    {{ profile_form.available }}
-                    <span class="ml-2 text-gray-700">Disponivel para novas oportunidades</span>
-                </label>
+
+            <div class="mt-6 flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-4">
+                {{ profile_form.available }}
+                <span class="text-sm font-medium text-slate-700">Disponível para novas oportunidades</span>
             </div>
         </div>
-        
+
         <div class="flex justify-end">
-            <button type="submit" class="bg-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-primary-dark transition">
-                Salvar Alteracoes
-            </button>
+            <button type="submit" class="btn-primary btn-lg">Salvar Alterações</button>
         </div>
     </form>
 </div>
