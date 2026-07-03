@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from jobs.models import Job
 from courses.models import Course
 
@@ -25,3 +25,23 @@ def about(request):
 
 def contact(request):
     return render(request, 'core/contact.html')
+
+
+def company_detail(request, user_id):
+    """Página pública da empresa com perfil, vagas ativas e publicações."""
+    from django.contrib.auth import get_user_model
+    from feed.models import Post
+
+    User = get_user_model()
+    company_user = get_object_or_404(User, id=user_id, user_type='company', is_active=True)
+    profile = getattr(company_user, 'company_profile', None)
+
+    active_jobs = Job.objects.filter(company=company_user, is_active=True).order_by('-created_at')
+    posts = Post.objects.filter(author=company_user).order_by('-created_at')[:5]
+
+    return render(request, 'core/company_detail.html', {
+        'company_user': company_user,
+        'profile': profile,
+        'active_jobs': active_jobs,
+        'posts': posts,
+    })

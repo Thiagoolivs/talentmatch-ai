@@ -21,8 +21,13 @@ def course_list(request):
     paginator = Paginator(courses, 12)
     page = request.GET.get('page')
     courses = paginator.get_page(page)
+
+    params = request.GET.copy()
+    params.pop('page', None)
+    query_string = params.urlencode()
     
     return render(request, 'courses/course_list.html', {
+        'query_string': query_string,
         'courses': courses,
         'areas': Course.AREA_CHOICES,
         'levels': Course.LEVEL_CHOICES,

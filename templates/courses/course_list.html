@@ -65,11 +65,11 @@
     <div class="mt-8 flex justify-center">
         <nav class="flex items-center gap-2">
             {% if courses.has_previous %}
-            <a href="?page={{ courses.previous_page_number }}" class="btn-secondary btn-sm !text-sm !px-4 !py-2">Anterior</a>
+            <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ courses.previous_page_number }}" class="btn-secondary btn-sm !text-sm !px-4 !py-2">Anterior</a>
             {% endif %}
             <span class="px-4 py-2 text-sm font-medium text-slate-500">Página {{ courses.number }} de {{ courses.paginator.num_pages }}</span>
             {% if courses.has_next %}
-            <a href="?page={{ courses.next_page_number }}" class="btn-secondary btn-sm !text-sm !px-4 !py-2">Próxima</a>
+            <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ courses.next_page_number }}" class="btn-secondary btn-sm !text-sm !px-4 !py-2">Próxima</a>
             {% endif %}
         </nav>
     </div>

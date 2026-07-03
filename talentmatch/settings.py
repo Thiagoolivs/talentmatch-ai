@@ -19,9 +19,6 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.up.railway.app',
-    'https://*.replit.dev',
-    'https://*.repl.co',
-    'https://*.picard.replit.dev',
     'http://localhost:5000',
     'http://127.0.0.1:5000',
     'http://localhost:8000',
@@ -63,6 +60,7 @@ INSTALLED_APPS = [
     'chatbot',
     'dashboard',
     'messaging',
+    'feed',
     'api',
 ]
 
@@ -159,10 +157,27 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+}
+
+# Armazenamento externo opcional (S3 ou compatível: R2, B2, MinIO...) para mídia.
+# O filesystem do Railway é efêmero: sem isso, uploads (fotos, currículos, logos)
+# são perdidos a cada deploy. Ativa quando AWS_STORAGE_BUCKET_NAME estiver definido.
+if os.environ.get('AWS_STORAGE_BUCKET_NAME'):
+    STORAGES['default'] = {'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage'}
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+    AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL') or None
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_FILE_OVERWRITE = False
 
 # -------------------------------------------
 # 📬 EMAIL

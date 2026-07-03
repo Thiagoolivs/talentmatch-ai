@@ -69,13 +69,13 @@
                             <h2 class="text-lg font-bold mb-0.5">
                                 <a href="{% url 'jobs:detail' job.pk %}" class="hover:text-brand-700 transition-colors">{{ job.title }}</a>
                             </h2>
-                            <p class="text-sm text-brand-700 font-medium mb-3">
+                            <a href="{% url 'core:company_detail' job.company.id %}" class="inline-block text-sm text-brand-700 font-medium mb-3 hover:underline">
                                 {% if job.company.company_profile %}
                                     {{ job.company.company_profile.company_name }}
                                 {% else %}
                                     {{ job.company.username }}
                                 {% endif %}
-                            </p>
+                            </a>
                             <p class="text-sm text-slate-500 mb-4">{{ job.description|truncatewords:30 }}</p>
                             <div class="flex flex-wrap gap-2">
                                 <span class="badge-blue">{{ job.get_job_type_display }}</span>
@@ -113,11 +113,11 @@
             <div class="mt-8 flex justify-center">
                 <nav class="flex items-center gap-2">
                     {% if jobs.has_previous %}
-                    <a href="?page={{ jobs.previous_page_number }}" class="btn-secondary btn-sm !text-sm !px-4 !py-2">Anterior</a>
+                    <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ jobs.previous_page_number }}" class="btn-secondary btn-sm !text-sm !px-4 !py-2">Anterior</a>
                     {% endif %}
                     <span class="px-4 py-2 text-sm font-medium text-slate-500">Página {{ jobs.number }} de {{ jobs.paginator.num_pages }}</span>
                     {% if jobs.has_next %}
-                    <a href="?page={{ jobs.next_page_number }}" class="btn-secondary btn-sm !text-sm !px-4 !py-2">Próxima</a>
+                    <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ jobs.next_page_number }}" class="btn-secondary btn-sm !text-sm !px-4 !py-2">Próxima</a>
                     {% endif %}
                 </nav>
             </div>

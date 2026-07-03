@@ -14,6 +14,7 @@ urlpatterns = [
     path('match/', include('match.urls')),
     path('api/', include('api.urls')),
     path('messages/', include('messaging.urls')),
+    path('feed/', include('feed.urls')),
 ]
 
 if settings.DEBUG:
