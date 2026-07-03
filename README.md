@@ -234,10 +234,6 @@ Acesse: `http://localhost:5000`
 gunicorn --bind=0.0.0.0:5000 --reuse-port talentmatch.wsgi:application
 ```
 
-### No Replit
-
-O projeto ja esta configurado. Basta clicar em "Run".
-
 ---
 
 ## Estrutura do Projeto
@@ -452,12 +448,6 @@ python manage.py migrate
 4. [ ] Executar `collectstatic`
 5. [ ] Configurar servidor HTTPS
 6. [ ] Configurar backups do banco de dados
-
-### Deploy no Replit
-
-1. O projeto ja esta configurado para deploy
-2. Clique em "Deploy" no Replit
-3. O sistema usara Gunicorn automaticamente
 
 ### Comando de Producao
 

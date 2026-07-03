@@ -49,13 +49,6 @@ media/
 *.swo
 *~
 
-# Replit
-.replit
-.cache/
-.upm/
-.local/
-replit.nix
-
 # OS
 .DS_Store
 Thumbs.db
