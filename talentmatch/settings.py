@@ -28,6 +28,9 @@ CSRF_TRUSTED_ORIGINS = [
 # Railway usa proxy HTTPS — obrigatório
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# O healthcheck do Railway acessa via HTTP puro e exige 200 (um 301 derruba o deploy)
+SECURE_REDIRECT_EXEMPT = [r'^health/?$']
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True

@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from jobs.models import Job
 from courses.models import Course
@@ -45,3 +46,8 @@ def company_detail(request, user_id):
         'active_jobs': active_jobs,
         'posts': posts,
     })
+
+
+def health(request):
+    """Endpoint de healthcheck para o Railway: sempre 200, sem tocar no banco."""
+    return HttpResponse('ok', content_type='text/plain')

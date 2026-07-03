@@ -25,6 +25,7 @@ class ProfileRedirectMiddleware:
 class MaintenanceModeMiddleware:
     """Ativa modo de manutencao para usuarios nao-admin."""
     EXEMPT_URLS = [
+        '/health/',
         '/admin/',
         '/accounts/login/',
         '/accounts/logout/',
