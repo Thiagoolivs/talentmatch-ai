@@ -128,6 +128,7 @@
                         <a href="{% url 'jobs:list' %}" class="{% if ns == 'jobs' %}nav-link-active{% else %}nav-link{% endif %}">Vagas</a>
                         <a href="{% url 'courses:list' %}" class="{% if ns == 'courses' %}nav-link-active{% else %}nav-link{% endif %}">Cursos</a>
                         {% if user.is_authenticated %}
+                            <a href="{% url 'feed:index' %}" class="{% if ns == 'feed' %}nav-link-active{% else %}nav-link{% endif %}">Comunidade</a>
                             <a href="{% url 'messaging:list' %}" class="{% if ns == 'messaging' %}nav-link-active{% else %}nav-link{% endif %} relative">
                                 Mensagens
                                 {% if unread_messages_count %}
@@ -255,6 +256,7 @@
                 <a href="{% url 'jobs:list' %}" class="mobile-link">Vagas</a>
                 <a href="{% url 'courses:list' %}" class="mobile-link">Cursos</a>
                 {% if user.is_authenticated %}
+                    <a href="{% url 'feed:index' %}" class="mobile-link">Comunidade</a>
                     <a href="{% url 'messaging:list' %}" class="mobile-link">
                         Mensagens
                         {% if unread_messages_count %}<span class="ml-auto min-w-[1.25rem] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full inline-flex items-center justify-center">{{ unread_messages_count }}</span>{% endif %}
