@@ -98,6 +98,26 @@ def logout_view(request):
     return redirect('core:home')
 
 
+def get_candidate_profile_tips(profile_obj, user):
+    """Checklist de melhorias do perfil do candidato com percentual de completude."""
+    has_links = any([profile_obj.linkedin_url, profile_obj.github_url, profile_obj.portfolio_url])
+    tips = [
+        {'label': 'Adicionar foto de perfil', 'done': bool(user.avatar)},
+        {'label': 'Escrever resumo profissional (mín. 20 caracteres)', 'done': bool(profile_obj.bio and len(profile_obj.bio) >= 20)},
+        {'label': 'Listar suas habilidades', 'done': bool(profile_obj.skills)},
+        {'label': 'Definir área de interesse', 'done': bool(profile_obj.interest_area)},
+        {'label': 'Informar cidade e estado', 'done': bool(getattr(profile_obj, 'city', None) and getattr(profile_obj, 'state', None))},
+        {'label': 'Descrever sua experiência', 'done': bool(profile_obj.experience)},
+        {'label': 'Adicionar formação acadêmica', 'done': bool(profile_obj.education)},
+        {'label': 'Anexar currículo em PDF', 'done': bool(profile_obj.resume)},
+        {'label': 'Adicionar links profissionais (LinkedIn, GitHub...)', 'done': has_links},
+        {'label': 'Informar pretensão salarial', 'done': bool(profile_obj.desired_salary)},
+    ]
+    done_count = sum(1 for t in tips if t['done'])
+    percent = int(done_count / len(tips) * 100)
+    return tips, percent
+
+
 def check_profile_completeness(profile_obj, user):
     missing_fields = []
     if hasattr(profile_obj, 'bio'):
@@ -161,11 +181,15 @@ def profile(request):
             if profile_incomplete and not request.GET.get('saved'):
                 messages.warning(request, f'Complete seu perfil para melhorar suas chances. Campos faltando: {", ".join(missing_fields)}')
         
+        profile_tips, profile_percent = get_candidate_profile_tips(profile_obj, user)
+
         return render(request, 'accounts/profile_candidate.html', {
             'user_form': user_form,
             'profile_form': profile_form,
             'profile_incomplete': profile_incomplete,
-            'missing_fields': missing_fields
+            'missing_fields': missing_fields,
+            'profile_tips': profile_tips,
+            'profile_percent': profile_percent,
         })
     
     elif user.is_company():

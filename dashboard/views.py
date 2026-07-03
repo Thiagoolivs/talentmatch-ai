@@ -70,6 +70,24 @@ def candidate_dashboard(request):
         if profile.education: profile_complete += 15
         if profile.resume: profile_complete += 20
     
+    # Empresas que combinam com o perfil (derivadas das vagas recomendadas)
+    interesting_companies = []
+    seen_companies = set()
+    for rec in recommended_jobs:
+        company = rec['job'].company
+        if company.id in seen_companies:
+            continue
+        seen_companies.add(company.id)
+        interesting_companies.append({
+            'company': company,
+            'profile': getattr(company, 'company_profile', None),
+            'best_job': rec['job'],
+            'score': rec['score'],
+            'open_jobs': Job.objects.filter(company=company, is_active=True).count(),
+        })
+        if len(interesting_companies) >= 4:
+            break
+
     return render(request, 'dashboard/candidate.html', {
         'applications': applications[:5],
         'applications_count': applications_count,
@@ -80,6 +98,7 @@ def candidate_dashboard(request):
         'recommended_courses': recommended_courses,
         'skill_gaps': skill_gaps[:5],
         'profile_complete': profile_complete,
+        'interesting_companies': interesting_companies,
     })
 
 

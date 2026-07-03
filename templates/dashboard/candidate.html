@@ -142,6 +142,48 @@
         </div>
     </div>
 
+    {% if interesting_companies %}
+    <div class="mt-8">
+        <div class="flex items-end justify-between mb-5">
+            <div>
+                <h2 class="text-lg font-bold">Empresas que combinam com você</h2>
+                <p class="text-slate-400 text-sm mt-0.5">Baseado nas suas habilidades e área de interesse</p>
+            </div>
+            <a href="{% url 'match:recommended_jobs' %}" class="text-brand-700 text-sm font-semibold hover:underline">Ver vagas recomendadas</a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {% for item in interesting_companies %}
+            <a href="{% url 'jobs:detail' item.best_job.pk %}" class="card-hover p-5 flex flex-col">
+                <div class="flex items-center gap-3 mb-3">
+                    {% if item.profile.logo %}
+                    <img src="{{ item.profile.logo.url }}" alt="{{ item.profile.company_name }}" class="w-11 h-11 rounded-xl object-cover shrink-0">
+                    {% else %}
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white flex items-center justify-center font-bold shrink-0">
+                        {% if item.profile %}{{ item.profile.company_name|slice:":1"|upper }}{% else %}{{ item.company.username|slice:":1"|upper }}{% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="min-w-0">
+                        <p class="font-bold text-slate-800 truncate">
+                            {% if item.profile %}{{ item.profile.company_name }}{% else %}{{ item.company.username }}{% endif %}
+                        </p>
+                        {% if item.profile.industry %}
+                        <p class="text-xs text-slate-400 truncate">{{ item.profile.industry }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if item.profile.location %}
+                <p class="text-xs text-slate-400 mb-3 truncate">{{ item.profile.location }}</p>
+                {% endif %}
+                <div class="mt-auto flex items-center justify-between">
+                    <span class="badge-gray">{{ item.open_jobs }} vaga{{ item.open_jobs|pluralize }}</span>
+                    <span class="px-2.5 py-1 bg-brand-700 text-white text-xs font-bold rounded-full">{{ item.score|floatformat:0 }}% match</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     {% if skill_gaps %}
     <div class="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-6">
         <h3 class="text-base font-bold text-amber-800 mb-2">Habilidades em Demanda</h3>
