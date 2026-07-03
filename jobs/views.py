@@ -16,10 +16,16 @@ def job_list(request):
     paginator = Paginator(job_filter.qs, 10)
     page = request.GET.get('page')
     jobs = paginator.get_page(page)
-    
+
+    # Query string sem 'page' para a paginação preservar os filtros
+    params = request.GET.copy()
+    params.pop('page', None)
+    query_string = params.urlencode()
+
     return render(request, 'jobs/job_list.html', {
         'jobs': jobs,
-        'filter': job_filter
+        'filter': job_filter,
+        'query_string': query_string,
     })
 
 

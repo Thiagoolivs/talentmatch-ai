@@ -52,11 +52,13 @@ def conversation_detail(request, user_id):
     conversation.messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
     
     chat_messages = conversation.messages.select_related('sender').order_by('created_at')
-    
+
+    # 'chat_messages' (e não 'messages') para não colidir com o framework
+    # de mensagens do Django usado nos toasts do base.html
     return render(request, 'messaging/conversation_detail.html', {
         'conversation': conversation,
         'other_user': other_user,
-        'messages': chat_messages,
+        'chat_messages': chat_messages,
     })
 
 
@@ -192,3 +194,34 @@ def unread_count(request):
     ).exclude(sender=request.user).count()
     
     return JsonResponse({'unread_count': count})
+
+
+@login_required
+def sync_messages(request, user_id):
+    """Retorna mensagens novas (id > after) para atualização incremental do chat."""
+    other_user = get_object_or_404(User, id=user_id)
+
+    if other_user == request.user or not can_message(request.user, other_user):
+        return JsonResponse({'error': 'Sem permissao.'}, status=403)
+
+    conversation = get_or_create_conversation(request.user, other_user)
+
+    try:
+        after = int(request.GET.get('after', 0))
+    except (TypeError, ValueError):
+        after = 0
+
+    new_msgs = conversation.messages.filter(id__gt=after).select_related('sender').order_by('created_at')
+    new_msgs.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
+
+    return JsonResponse({
+        'messages': [
+            {
+                'id': m.id,
+                'text': m.text,
+                'mine': m.sender == request.user,
+                'created_at': m.created_at.strftime('%H:%M'),
+            }
+            for m in new_msgs
+        ]
+    })

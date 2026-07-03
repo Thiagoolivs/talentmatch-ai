@@ -207,6 +207,10 @@ Crie um arquivo `.env` ou configure as variaveis de ambiente:
 | `GROQ_API_KEY` | Nao | Chave da API Groq para chatbot IA | - |
 | `DEBUG` | Nao | Modo debug (True/False) | True |
 | `ADMIN_ACCESS_CODE` | Nao | Codigo para acesso admin alternativo | tm2025admin |
+| `ADMIN_PASSWORD` | Sim (prod) | Senha do admin criado por `create_admin` (sem ela, o comando nao cria o usuario) | - |
+| `EMAIL_HOST_PASSWORD` | Sim (prod) | Chave SMTP (Brevo) para envio real de emails; sem ela, emails vao para o console | - |
+| `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_HOST_USER` | Nao | Sobrescrevem o relay SMTP padrao | smtp-relay.brevo.com:587 |
+| `AWS_STORAGE_BUCKET_NAME` + credenciais | Nao | Ativa armazenamento S3 (ou compativel) para uploads; recomendado em producao | - |
 
 ### Configuracao do Banco de Dados
 

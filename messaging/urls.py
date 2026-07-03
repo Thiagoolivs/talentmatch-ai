@@ -9,4 +9,5 @@ urlpatterns = [
     path('send/<int:user_id>/', views.send_message, name='send'),
     path('start/<int:application_id>/', views.start_conversation, name='start'),
     path('unread/', views.unread_count, name='unread'),
+    path('sync/<int:user_id>/', views.sync_messages, name='sync'),
 ]

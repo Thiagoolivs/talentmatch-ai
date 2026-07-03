@@ -337,13 +337,28 @@ class Notification(models.Model):
     
     @classmethod
     def notify_user(cls, user, notification_type, title, message, link=''):
-        return cls.objects.create(
+        notification = cls.objects.create(
             user=user,
             notification_type=notification_type,
             title=title,
             message=message,
             link=link
         )
+        # Email transacional junto com a notificação in-app (best-effort)
+        if user.email:
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                send_mail(
+                    subject=f'TalentMatch - {title}',
+                    message=f'{message}\n\nAcesse a plataforma para mais detalhes.',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+        return notification
 
 
 class EmailVerificationCode(models.Model):

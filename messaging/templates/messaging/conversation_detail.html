@@ -60,8 +60,8 @@
             </div>
             {% endif %}
 
-            {% for message in messages %}
-            <div class="flex {% if message.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
+            {% for message in chat_messages %}
+            <div class="flex {% if message.sender == request.user %}justify-end{% else %}justify-start{% endif %}" data-message-id="{{ message.id }}">
                 <div class="message-bubble {% if message.sender == request.user %}bg-brand-700 text-white rounded-2xl rounded-br-md{% else %}bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-bl-md shadow-sm{% endif %} px-4 py-2.5">
                     <p class="text-sm leading-relaxed">{{ message.text }}</p>
                     <p class="text-[11px] {% if message.sender == request.user %}text-blue-200{% else %}text-slate-400{% endif %} mt-1 text-right">
@@ -102,6 +102,32 @@
     const chatContainer = document.getElementById('chat-messages');
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
+    function lastMessageId() {
+        const items = chatContainer.querySelectorAll('[data-message-id]');
+        return items.length ? parseInt(items[items.length - 1].dataset.messageId, 10) : 0;
+    }
+
+    function appendMessage(msg) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'flex ' + (msg.mine ? 'justify-end' : 'justify-start');
+        messageDiv.dataset.messageId = msg.id;
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble px-4 py-2.5 ' + (msg.mine
+            ? 'bg-brand-700 text-white rounded-2xl rounded-br-md'
+            : 'bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-bl-md shadow-sm');
+        const textP = document.createElement('p');
+        textP.className = 'text-sm leading-relaxed';
+        textP.textContent = msg.text;
+        const timeP = document.createElement('p');
+        timeP.className = 'text-[11px] mt-1 text-right ' + (msg.mine ? 'text-blue-200' : 'text-slate-400');
+        timeP.textContent = msg.created_at;
+        bubble.appendChild(textP);
+        bubble.appendChild(timeP);
+        messageDiv.appendChild(bubble);
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
     document.getElementById('message-form').addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -122,21 +148,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'flex justify-end';
-                const bubble = document.createElement('div');
-                bubble.className = 'message-bubble bg-brand-700 text-white rounded-2xl rounded-br-md px-4 py-2.5';
-                const textP = document.createElement('p');
-                textP.className = 'text-sm leading-relaxed';
-                textP.textContent = data.message.text;
-                const timeP = document.createElement('p');
-                timeP.className = 'text-[11px] text-blue-200 mt-1 text-right';
-                timeP.textContent = data.message.created_at;
-                bubble.appendChild(textP);
-                bubble.appendChild(timeP);
-                messageDiv.appendChild(bubble);
-                chatContainer.appendChild(messageDiv);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                appendMessage({ id: data.message.id, text: data.message.text, mine: true, created_at: data.message.created_at });
                 input.value = '';
             } else {
                 alert(data.error || 'Erro ao enviar mensagem');
@@ -148,8 +160,17 @@
         });
     });
 
-    setInterval(function() {
-        location.reload();
-    }, 30000);
+    // Busca incremental de mensagens novas (sem recarregar a página)
+    const SYNC_URL = '{% url "messaging:sync" other_user.id %}';
+    setInterval(async function() {
+        try {
+            const resp = await fetch(SYNC_URL + '?after=' + lastMessageId(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            (data.messages || []).forEach(appendMessage);
+        } catch (e) { /* offline momentâneo: tenta de novo no próximo ciclo */ }
+    }, 5000);
 </script>
 {% endblock %}
