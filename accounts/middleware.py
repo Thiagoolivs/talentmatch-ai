@@ -79,3 +79,37 @@ class MetricsMiddleware:
                 pass
         
         return response
+
+
+class EmailVerificationMiddleware:
+    """Exige verificação de email por código antes de usar a plataforma."""
+
+    EXEMPT_PREFIXES = [
+        '/accounts/verify-email/',
+        '/accounts/logout/',
+        '/accounts/login/',
+        '/accounts/support/',
+        '/accounts/forgot-password/',
+        '/accounts/reset/',
+        '/admin/',
+        '/static/',
+        '/media/',
+    ]
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = request.user
+        if (
+            user.is_authenticated
+            and not getattr(user, 'email_verified', True)
+            and not user.is_staff
+            and not user.is_superuser
+            and not user.is_admin_user()
+            and not any(request.path.startswith(p) for p in self.EXEMPT_PREFIXES)
+        ):
+            from django.shortcuts import redirect
+            return redirect('accounts:verify_email')
+
+        return self.get_response(request)

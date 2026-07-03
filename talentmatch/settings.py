@@ -84,6 +84,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # Seus middlewares
+    'accounts.middleware.EmailVerificationMiddleware',
     'accounts.middleware.ProfileRedirectMiddleware',
     'accounts.middleware.MaintenanceModeMiddleware',
 ]
@@ -167,8 +168,20 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # 📬 EMAIL
 # -------------------------------------------
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@talentmatch.com'
+# SMTP (Brevo) ativado quando EMAIL_HOST_PASSWORD estiver definido no ambiente;
+# sem a senha, os emails são exibidos no console (desenvolvimento).
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp-relay.brevo.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'b0cb28001@smtp-brevo.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() in ('true', '1', 'yes')
+
+if EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@talentmatch.com')
 
 # -------------------------------------------
 # 🔎 DJANGO REST FRAMEWORK

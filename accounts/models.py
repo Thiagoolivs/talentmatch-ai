@@ -11,6 +11,7 @@ class User(AbstractUser):
     )
     
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='candidate')
+    email_verified = models.BooleanField(default=False, help_text='Email confirmado via codigo de verificacao')
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -343,3 +344,25 @@ class Notification(models.Model):
             message=message,
             link=link
         )
+
+
+class EmailVerificationCode(models.Model):
+    """Código OTP enviado por email para confirmar a posse do endereço."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verification_codes')
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveIntegerField(default=0)
+    used = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Codigo de Verificacao de Email'
+        verbose_name_plural = 'Codigos de Verificacao de Email'
+
+    def __str__(self):
+        return f"Codigo para {self.user.username} ({'usado' if self.used else 'ativo'})"
+
+    def is_expired(self):
+        from django.utils import timezone
+        return timezone.now() > self.expires_at

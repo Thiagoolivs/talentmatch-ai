@@ -1,10 +1,24 @@
 import json
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import ChatSession, ChatMessage
 from .ai_engine import get_ai_response, update_chat_memory
+
+
+def _get_sessions_sidebar(user):
+    """Sessões recentes para a barra lateral do chat."""
+    sessions = ChatSession.objects.filter(user=user).order_by('-updated_at')[:15]
+    items = []
+    for s in sessions:
+        first = s.messages.filter(role='user').first()
+        items.append({
+            'session': s,
+            'first_message': first.content[:40] if first else 'Nova conversa',
+            'message_count': s.messages.count(),
+        })
+    return items
 
 
 @login_required
@@ -14,12 +28,15 @@ def chat_page(request):
         is_active=True,
         defaults={}
     )
-    
-    messages = session.messages.all()[:50]
-    
+
+    # 'chat_messages' (e não 'messages') para não colidir com o framework
+    # de mensagens do Django usado nos toasts do base.html
+    chat_messages = session.messages.all()[:50]
+
     return render(request, 'chatbot/chat.html', {
         'session': session,
-        'messages': messages
+        'chat_messages': chat_messages,
+        'sidebar_sessions': _get_sessions_sidebar(request.user),
     })
 
 
@@ -104,10 +121,20 @@ def chat_history(request):
 def view_session(request, session_id):
     """Visualiza uma sessao especifica do historico."""
     session = get_object_or_404(ChatSession, id=session_id, user=request.user)
-    messages = session.messages.all()
-    
+    chat_messages = session.messages.all()
+
     return render(request, 'chatbot/chat.html', {
         'session': session,
-        'messages': messages,
-        'view_only': not session.is_active
+        'chat_messages': chat_messages,
+        'view_only': not session.is_active,
+        'sidebar_sessions': _get_sessions_sidebar(request.user),
     })
+
+
+@login_required
+@require_POST
+def delete_session(request, session_id):
+    """Exclui uma sessão de chat do usuário."""
+    session = get_object_or_404(ChatSession, id=session_id, user=request.user)
+    session.delete()
+    return redirect('chatbot:chat')

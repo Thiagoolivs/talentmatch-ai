@@ -3,165 +3,245 @@
 {% block title %}Meu Perfil - TalentMatch{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-10">
+<div class="max-w-6xl mx-auto px-4 py-10">
     <div class="page-header">
         <h1 class="page-title">Meu Perfil</h1>
-        <p class="page-subtitle">Mantenha seus dados atualizados para melhorar seus matches</p>
+        <p class="page-subtitle">Mantenha seus dados atualizados para melhorar seus matches. Campos com <span class="text-red-500 font-semibold">*</span> são obrigatórios.</p>
     </div>
 
-    {% if profile_incomplete %}
-    <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-        <svg class="h-5 w-5 text-amber-500 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-        </svg>
-        <p class="text-sm text-amber-800">
-            <strong>Perfil incompleto!</strong> Complete os campos obrigatórios para melhorar suas chances de match.
-        </p>
-    </div>
-    {% endif %}
-
-    <form method="post" enctype="multipart/form-data" class="space-y-6">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <div class="card p-6 md:p-8">
-            <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                </span>
-                Informações Pessoais
-            </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <div class="lg:col-span-2 space-y-6">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                    <label class="form-label">Nome</label>
-                    {{ user_form.first_name }}
-                </div>
-                <div>
-                    <label class="form-label">Sobrenome</label>
-                    {{ user_form.last_name }}
-                </div>
-                <div>
-                    <label class="form-label">Email</label>
-                    {{ user_form.email }}
-                </div>
-                <div>
-                    <label class="form-label">Telefone</label>
-                    {{ user_form.phone }}
-                    <p class="form-help">Formato: (XX) XXXXX-XXXX</p>
-                </div>
-                <div>
-                    <label class="form-label">Idade</label>
-                    {{ profile_form.age }}
-                </div>
-                <div class="md:col-span-2">
-                    <label class="form-label">Foto de Perfil</label>
-                    {{ user_form.avatar }}
-                </div>
-            </div>
-        </div>
-
-        <div class="card p-6 md:p-8">
-            <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                </span>
-                Localização <span class="text-red-500">*</span>
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                    <label class="form-label">Cidade <span class="text-red-500">*</span></label>
-                    {{ profile_form.city }}
-                </div>
-                <div>
-                    <label class="form-label">Estado <span class="text-red-500">*</span></label>
-                    {{ profile_form.state }}
-                </div>
-            </div>
-        </div>
-
-        <div class="card p-6 md:p-8">
-            <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                </span>
-                Perfil Profissional
-            </h2>
-
-            <div class="space-y-5">
-                <div>
-                    <label class="form-label">Resumo Profissional</label>
-                    {{ profile_form.bio }}
-                    <p class="form-help">Mínimo 20 caracteres, máximo 500 caracteres.</p>
-                </div>
-                <div>
-                    <label class="form-label">Habilidades (separadas por vírgula)</label>
-                    {{ profile_form.skills }}
-                    <p class="form-help">Ex: Python, JavaScript, React, Django, SQL...</p>
-                </div>
-                <div>
-                    <label class="form-label">Área de Interesse</label>
-                    {{ profile_form.interest_area }}
-                    <p class="form-help">Ex: Desenvolvimento Web, Data Science, DevOps...</p>
-                </div>
-                <div>
-                    <label class="form-label">Experiência Profissional</label>
-                    {{ profile_form.experience }}
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label class="form-label">Anos de Experiência</label>
-                        {{ profile_form.experience_years }}
-                    </div>
-                    <div>
-                        <label class="form-label">Pretensão Salarial</label>
-                        {{ profile_form.desired_salary }}
+                <!-- Cabeçalho do perfil com foto e completude -->
+                <div class="card p-6 md:p-8">
+                    <div class="flex flex-col sm:flex-row items-center gap-6">
+                        <div class="relative shrink-0">
+                            {% if user.avatar %}
+                            <img id="avatar-preview" src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-24 h-24 rounded-full object-cover ring-4 ring-brand-50">
+                            {% else %}
+                            <img id="avatar-preview" src="" alt="" class="w-24 h-24 rounded-full object-cover ring-4 ring-brand-50 hidden">
+                            <div id="avatar-placeholder" class="w-24 h-24 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white flex items-center justify-center text-3xl font-bold ring-4 ring-brand-50">
+                                {{ user.username|slice:":1"|upper }}
+                            </div>
+                            {% endif %}
+                            <button type="button" id="avatar-btn" class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-brand-700 text-white flex items-center justify-center shadow-md hover:bg-brand-800 transition-colors" title="Alterar foto de perfil" aria-label="Alterar foto de perfil">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            </button>
+                            <div class="hidden">{{ user_form.avatar }}</div>
+                        </div>
+                        <div class="flex-grow w-full text-center sm:text-left">
+                            <h2 class="text-xl font-bold">{{ user.get_full_name|default:user.username }}</h2>
+                            <p class="text-slate-400 text-sm mb-4">{{ user.email }}</p>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Perfil completo</span>
+                                <span class="text-sm font-bold {% if profile_percent >= 80 %}text-emerald-600{% elif profile_percent >= 50 %}text-brand-700{% else %}text-amber-600{% endif %}">{{ profile_percent }}%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                <div class="h-2.5 rounded-full transition-all {% if profile_percent >= 80 %}bg-gradient-to-r from-emerald-400 to-emerald-600{% else %}bg-gradient-to-r from-brand-500 to-brand-700{% endif %}" style="width: {{ profile_percent }}%"></div>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-2">Clique na câmera para adicionar ou trocar sua foto. Perfis completos recebem matches melhores.</p>
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <label class="form-label">Formação Acadêmica</label>
-                    {{ profile_form.education }}
+
+                <div class="card p-6 md:p-8" id="secao-pessoal">
+                    <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </span>
+                        Informações Pessoais
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="form-label">Nome</label>
+                            {{ user_form.first_name }}
+                        </div>
+                        <div>
+                            <label class="form-label">Sobrenome</label>
+                            {{ user_form.last_name }}
+                        </div>
+                        <div>
+                            <label class="form-label">Email</label>
+                            {{ user_form.email }}
+                        </div>
+                        <div>
+                            <label class="form-label">Telefone</label>
+                            {{ user_form.phone }}
+                            <p class="form-help">Formato: (XX) XXXXX-XXXX</p>
+                        </div>
+                        <div>
+                            <label class="form-label">Idade</label>
+                            {{ profile_form.age }}
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="form-label">Currículo (PDF)</label>
-                    {{ profile_form.resume }}
-                    <p class="form-help">Máximo 5MB, apenas PDF.</p>
+
+                <div class="card p-6 md:p-8" id="secao-localizacao">
+                    <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </span>
+                        Localização
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="form-label">Cidade <span class="text-red-500">*</span></label>
+                            {{ profile_form.city }}
+                        </div>
+                        <div>
+                            <label class="form-label">Estado <span class="text-red-500">*</span></label>
+                            {{ profile_form.state }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 md:p-8" id="secao-profissional">
+                    <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </span>
+                        Perfil Profissional
+                    </h2>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label class="form-label">Resumo Profissional <span class="text-red-500">*</span></label>
+                            {{ profile_form.bio }}
+                            <p class="form-help">Mínimo 20 caracteres. Fale sobre você, seus objetivos e o que te destaca.</p>
+                        </div>
+                        <div>
+                            <label class="form-label">Habilidades (separadas por vírgula) <span class="text-red-500">*</span></label>
+                            {{ profile_form.skills }}
+                            <p class="form-help">Ex: Python, JavaScript, React, Django, SQL... Quanto mais completo, melhores os matches.</p>
+                        </div>
+                        <div>
+                            <label class="form-label">Área de Interesse</label>
+                            {{ profile_form.interest_area }}
+                            <p class="form-help">Ex: Desenvolvimento Web, Data Science, DevOps...</p>
+                        </div>
+                        <div>
+                            <label class="form-label">Experiência Profissional</label>
+                            {{ profile_form.experience }}
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="form-label">Anos de Experiência</label>
+                                {{ profile_form.experience_years }}
+                            </div>
+                            <div>
+                                <label class="form-label">Pretensão Salarial</label>
+                                {{ profile_form.desired_salary }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label">Formação Acadêmica</label>
+                            {{ profile_form.education }}
+                        </div>
+                        <div>
+                            <label class="form-label">Currículo (PDF)</label>
+                            {{ profile_form.resume }}
+                            <p class="form-help">Máximo 5MB, apenas PDF.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 md:p-8" id="secao-links">
+                    <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                        </span>
+                        Links Profissionais
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div>
+                            <label class="form-label">LinkedIn</label>
+                            {{ profile_form.linkedin_url }}
+                        </div>
+                        <div>
+                            <label class="form-label">GitHub</label>
+                            {{ profile_form.github_url }}
+                        </div>
+                        <div>
+                            <label class="form-label">Portfólio</label>
+                            {{ profile_form.portfolio_url }}
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        {{ profile_form.available }}
+                        <span class="text-sm font-medium text-slate-700">Disponível para novas oportunidades</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" class="btn-primary btn-lg">Salvar Alterações</button>
                 </div>
             </div>
-        </div>
 
-        <div class="card p-6 md:p-8">
-            <h2 class="text-lg font-bold mb-6 flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                </span>
-                Links Profissionais
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div>
-                    <label class="form-label">LinkedIn</label>
-                    {{ profile_form.linkedin_url }}
+            <!-- Dicas para melhorar o perfil -->
+            <aside class="lg:sticky lg:top-24 space-y-4">
+                <div class="card p-6">
+                    <h3 class="text-base font-bold mb-1 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        Dicas para melhorar seu perfil
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-5">Perfis completos aparecem melhor no matching e chamam mais atenção das empresas.</p>
+                    <ul class="space-y-2.5">
+                        {% for tip in profile_tips %}
+                        <li class="flex items-start gap-2.5 text-sm {% if tip.done %}text-slate-400{% else %}text-slate-700{% endif %}">
+                            {% if tip.done %}
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-px">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </span>
+                            <span class="line-through decoration-slate-300">{{ tip.label }}</span>
+                            {% else %}
+                            <span class="w-5 h-5 rounded-full border-2 border-slate-200 shrink-0 mt-px"></span>
+                            <span>{{ tip.label }}</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
-                <div>
-                    <label class="form-label">GitHub</label>
-                    {{ profile_form.github_url }}
-                </div>
-                <div>
-                    <label class="form-label">Portfólio</label>
-                    {{ profile_form.portfolio_url }}
-                </div>
-            </div>
 
-            <div class="mt-6 flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-4">
-                {{ profile_form.available }}
-                <span class="text-sm font-medium text-slate-700">Disponível para novas oportunidades</span>
-            </div>
-        </div>
-
-        <div class="flex justify-end">
-            <button type="submit" class="btn-primary btn-lg">Salvar Alterações</button>
+                <div class="bg-brand-50 border border-brand-100 rounded-2xl p-5">
+                    <p class="text-sm text-brand-900 font-semibold mb-1">Precisa de ajuda?</p>
+                    <p class="text-xs text-brand-700/80 mb-4">Nossa IA pode analisar seu currículo e sugerir melhorias personalizadas.</p>
+                    <a href="{% url 'chatbot:chat' %}" class="btn-primary btn-sm w-full !text-xs">Conversar com a IA</a>
+                </div>
+            </aside>
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function() {
+        const btn = document.getElementById('avatar-btn');
+        const input = document.getElementById('id_avatar');
+        const preview = document.getElementById('avatar-preview');
+        const placeholder = document.getElementById('avatar-placeholder');
+        if (!btn || !input) return;
+
+        btn.addEventListener('click', function() { input.click(); });
+
+        input.addEventListener('change', function() {
+            const file = input.files && input.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                if (placeholder) placeholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
+    })();
+</script>
 {% endblock %}

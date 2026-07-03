@@ -4,6 +4,7 @@ from django.core.validators import RegexValidator, MinLengthValidator, MaxLength
 from django.core.exceptions import ValidationError
 import re
 import logging
+from .email_validation import validate_email_deliverability
 from .models import User, CandidateProfile, CompanyProfile
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,7 @@ class CandidateRegistrationForm(UserCreationForm):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('Este email ja esta cadastrado.')
+        validate_email_deliverability(email)
         return email
     
     def save(self, commit=True):
@@ -120,6 +122,7 @@ class CompanyRegistrationForm(UserCreationForm):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('Este email ja esta cadastrado.')
+        validate_email_deliverability(email)
         return email
     
     def save(self, commit=True):
@@ -323,6 +326,8 @@ class UserUpdateForm(forms.ModelForm):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError('Este email ja esta em uso.')
+        if email and email != self.instance.email:
+            validate_email_deliverability(email)
         return email
     
     def clean_phone(self):

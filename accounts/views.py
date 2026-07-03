@@ -12,7 +12,7 @@ import logging
 
 from .forms import (CandidateRegistrationForm, CompanyRegistrationForm, 
                     CustomLoginForm, CandidateProfileForm, CompanyProfileForm, UserUpdateForm)
-from .models import CandidateProfile, CompanyProfile
+from .models import CandidateProfile, CompanyProfile, User
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +34,10 @@ def register_candidate(request):
                 with transaction.atomic():
                     user = form.save()
                     login(request, user)
-                    messages.success(request, 'Conta criada com sucesso! Complete seu perfil.')
-                    return redirect('accounts:profile')
+                from .verification import send_verification_code
+                send_verification_code(user, force=True)
+                messages.success(request, 'Conta criada! Enviamos um código de verificação para o seu email.')
+                return redirect('accounts:verify_email')
             except Exception as e:
                 logger.error(f"Erro ao registrar candidato: {e}")
                 messages.error(request, 'Ocorreu um erro ao criar sua conta. Tente novamente.')
@@ -62,8 +64,10 @@ def register_company(request):
                 with transaction.atomic():
                     user = form.save()
                     login(request, user)
-                    messages.success(request, 'Conta da empresa criada com sucesso! Complete seu perfil.')
-                    return redirect('accounts:profile')
+                from .verification import send_verification_code
+                send_verification_code(user, force=True)
+                messages.success(request, 'Conta da empresa criada! Enviamos um código de verificação para o seu email.')
+                return redirect('accounts:verify_email')
             except Exception as e:
                 logger.error(f"Erro ao registrar empresa: {e}")
                 messages.error(request, 'Ocorreu um erro ao criar sua conta. Tente novamente.')
@@ -92,6 +96,26 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'Você saiu com sucesso.')
     return redirect('core:home')
+
+
+def get_candidate_profile_tips(profile_obj, user):
+    """Checklist de melhorias do perfil do candidato com percentual de completude."""
+    has_links = any([profile_obj.linkedin_url, profile_obj.github_url, profile_obj.portfolio_url])
+    tips = [
+        {'label': 'Adicionar foto de perfil', 'done': bool(user.avatar)},
+        {'label': 'Escrever resumo profissional (mín. 20 caracteres)', 'done': bool(profile_obj.bio and len(profile_obj.bio) >= 20)},
+        {'label': 'Listar suas habilidades', 'done': bool(profile_obj.skills)},
+        {'label': 'Definir área de interesse', 'done': bool(profile_obj.interest_area)},
+        {'label': 'Informar cidade e estado', 'done': bool(getattr(profile_obj, 'city', None) and getattr(profile_obj, 'state', None))},
+        {'label': 'Descrever sua experiência', 'done': bool(profile_obj.experience)},
+        {'label': 'Adicionar formação acadêmica', 'done': bool(profile_obj.education)},
+        {'label': 'Anexar currículo em PDF', 'done': bool(profile_obj.resume)},
+        {'label': 'Adicionar links profissionais (LinkedIn, GitHub...)', 'done': has_links},
+        {'label': 'Informar pretensão salarial', 'done': bool(profile_obj.desired_salary)},
+    ]
+    done_count = sum(1 for t in tips if t['done'])
+    percent = int(done_count / len(tips) * 100)
+    return tips, percent
 
 
 def check_profile_completeness(profile_obj, user):
@@ -128,10 +152,13 @@ def profile(request):
             profile_form = CandidateProfileForm(request.POST, request.FILES, instance=profile_obj)
             if user_form.is_valid() and profile_form.is_valid():
                 try:
+                    old_email = User.objects.get(pk=user.pk).email
                     with transaction.atomic():
                         user_form.save()
                         saved_profile = profile_form.save()
                         logger.info(f"Perfil salvo - User: {user.username}, City: {saved_profile.city}, State: {saved_profile.state}, Bio: {len(saved_profile.bio or '')} chars")
+                    if user.email != old_email:
+                        return _require_email_reverification(request, user)
                     messages.success(request, 'Perfil atualizado com sucesso!')
                     return redirect('accounts:profile')
                 except Exception as e:
@@ -154,11 +181,15 @@ def profile(request):
             if profile_incomplete and not request.GET.get('saved'):
                 messages.warning(request, f'Complete seu perfil para melhorar suas chances. Campos faltando: {", ".join(missing_fields)}')
         
+        profile_tips, profile_percent = get_candidate_profile_tips(profile_obj, user)
+
         return render(request, 'accounts/profile_candidate.html', {
             'user_form': user_form,
             'profile_form': profile_form,
             'profile_incomplete': profile_incomplete,
-            'missing_fields': missing_fields
+            'missing_fields': missing_fields,
+            'profile_tips': profile_tips,
+            'profile_percent': profile_percent,
         })
     
     elif user.is_company():
@@ -175,10 +206,13 @@ def profile(request):
             profile_form = CompanyProfileForm(request.POST, request.FILES, instance=profile_obj)
             if user_form.is_valid() and profile_form.is_valid():
                 try:
+                    old_email = User.objects.get(pk=user.pk).email
                     with transaction.atomic():
                         user_form.save()
                         profile_form.save()
                         logger.info(f"Perfil da empresa {profile_obj.company_name} salvo com sucesso")
+                    if user.email != old_email:
+                        return _require_email_reverification(request, user)
                     messages.success(request, 'Perfil da empresa atualizado com sucesso!')
                     return redirect('accounts:profile')
                 except Exception as e:
@@ -292,3 +326,39 @@ def notification_open(request, pk):
     if notification.link:
         return redirect(notification.link)
     return redirect('accounts:notifications')
+
+
+def _require_email_reverification(request, user):
+    """Após troca de email, exige nova verificação por código."""
+    from .verification import send_verification_code
+    user.email_verified = False
+    user.save(update_fields=['email_verified'])
+    send_verification_code(user, force=True)
+    messages.info(request, 'Você alterou seu email. Enviamos um código de verificação para o novo endereço.')
+    return redirect('accounts:verify_email')
+
+
+@login_required
+def verify_email(request):
+    from .verification import send_verification_code, verify_code
+
+    user = request.user
+    if user.email_verified:
+        return redirect('dashboard:index')
+
+    if request.method == 'POST':
+        if request.POST.get('action') == 'resend':
+            ok, error = send_verification_code(user)
+            if ok:
+                messages.success(request, f'Novo código enviado para {user.email}.')
+            else:
+                messages.error(request, error)
+            return redirect('accounts:verify_email')
+
+        ok, error = verify_code(user, request.POST.get('code', ''))
+        if ok:
+            messages.success(request, 'Email verificado com sucesso! Bem-vindo ao TalentMatch.')
+            return redirect('dashboard:index')
+        messages.error(request, error)
+
+    return render(request, 'accounts/verify_email.html', {'email': user.email})

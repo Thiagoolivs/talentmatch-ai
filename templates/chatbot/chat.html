@@ -2,43 +2,113 @@
 
 {% block title %}Chat IA - TalentMatch{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* O chat ocupa a tela inteira abaixo da navbar; footer escondido nesta página */
+    footer { display: none; }
+    #chat-app { height: calc(100vh - 4rem); }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-10">
-    <div class="card overflow-hidden">
-        <div class="gradient-bg hero-pattern text-white p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div class="flex items-center gap-3">
-                <span class="w-11 h-11 rounded-xl bg-white/15 ring-1 ring-white/25 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                </span>
-                <div>
-                    <h1 class="text-lg font-bold text-white">Assistente TalentMatch</h1>
-                    <p class="text-sm text-blue-100">Posso ajudar com currículo, vagas e cursos</p>
-                </div>
-            </div>
-            <div class="flex gap-2">
-                <a href="{% url 'chatbot:history' %}" class="btn bg-white/15 !text-white ring-1 ring-white/25 hover:bg-white/25 btn-sm !text-xs">Histórico</a>
-                {% if not view_only %}
-                <button onclick="newSession()" class="btn bg-white !text-brand-800 hover:bg-blue-50 btn-sm !text-xs">Nova Conversa</button>
+<div id="chat-app" class="flex bg-white overflow-hidden">
+
+    <!-- Backdrop mobile -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 top-16 bg-slate-900/40 z-30 md:hidden"></div>
+
+    <!-- Sidebar: ferramentas + histórico -->
+    <aside id="chat-sidebar" class="hidden md:flex flex-col w-72 shrink-0 border-r border-slate-200 bg-slate-50/70
+        max-md:fixed max-md:inset-y-0 max-md:top-16 max-md:left-0 max-md:z-40 max-md:w-80 max-md:bg-white max-md:shadow-2xl">
+        <div class="p-4 border-b border-slate-200">
+            {% if not view_only %}
+            <button onclick="newSession()" class="btn-primary w-full">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Nova Conversa
+            </button>
+            {% else %}
+            <a href="{% url 'chatbot:chat' %}" class="btn-primary w-full">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Voltar à Conversa Ativa
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="p-4 border-b border-slate-200">
+            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Ferramentas</p>
+            <div class="space-y-1">
+                {% if view_only %}
+                <a href="{% url 'chatbot:chat' %}" class="dropdown-item !px-2.5 rounded-lg">📄 Analisar meu currículo</a>
+                <a href="{% url 'chatbot:chat' %}" class="dropdown-item !px-2.5 rounded-lg">💼 Vagas para o meu perfil</a>
+                <a href="{% url 'chatbot:chat' %}" class="dropdown-item !px-2.5 rounded-lg">📚 Cursos recomendados</a>
+                <a href="{% url 'chatbot:chat' %}" class="dropdown-item !px-2.5 rounded-lg">🎯 Dicas de entrevista</a>
+                <a href="{% url 'chatbot:chat' %}" class="dropdown-item !px-2.5 rounded-lg">✨ Como melhorar meu perfil</a>
+                {% else %}
+                <button onclick="sendQuickMessage('Analise meu curriculo e me diga o que posso melhorar')" class="dropdown-item !px-2.5 rounded-lg w-full text-left">📄 Analisar meu currículo</button>
+                <button onclick="sendQuickMessage('Mostre vagas que combinam com o meu perfil')" class="dropdown-item !px-2.5 rounded-lg w-full text-left">💼 Vagas para o meu perfil</button>
+                <button onclick="sendQuickMessage('Recomende cursos para desenvolver minhas habilidades')" class="dropdown-item !px-2.5 rounded-lg w-full text-left">📚 Cursos recomendados</button>
+                <button onclick="sendQuickMessage('Me de dicas para me sair bem em entrevistas de emprego')" class="dropdown-item !px-2.5 rounded-lg w-full text-left">🎯 Dicas de entrevista</button>
+                <button onclick="sendQuickMessage('Como posso melhorar meu perfil no TalentMatch?')" class="dropdown-item !px-2.5 rounded-lg w-full text-left">✨ Como melhorar meu perfil</button>
                 {% endif %}
             </div>
         </div>
 
-        <div id="chat-messages" class="h-[28rem] overflow-y-auto p-5 space-y-4 bg-slate-50/50">
-            {% for msg in messages %}
+        <div class="flex-1 overflow-y-auto p-4">
+            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Histórico</p>
+            {% if sidebar_sessions %}
+            <div class="space-y-1">
+                {% for item in sidebar_sessions %}
+                <div class="group flex items-center gap-1 rounded-lg {% if item.session.id == session.id %}bg-brand-50 ring-1 ring-brand-200{% else %}hover:bg-slate-100{% endif %} transition-colors">
+                    <a href="{% url 'chatbot:view_session' item.session.id %}" class="flex-1 min-w-0 px-2.5 py-2">
+                        <p class="text-sm {% if item.session.id == session.id %}text-brand-800 font-semibold{% else %}text-slate-700{% endif %} truncate">{{ item.first_message }}</p>
+                        <p class="text-[11px] text-slate-400">{{ item.session.updated_at|date:"d/m H:i" }} &bull; {{ item.message_count }} msgs{% if item.session.is_active %} &bull; ativa{% endif %}</p>
+                    </a>
+                    <form method="post" action="{% url 'chatbot:delete_session' item.session.id %}" class="shrink-0 pr-1.5" onsubmit="return confirm('Excluir esta conversa? Esta ação não pode ser desfeita.')">
+                        {% csrf_token %}
+                        <button type="submit" class="p-1.5 rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 md:opacity-0 md:group-hover:opacity-100 transition-all" title="Excluir conversa" aria-label="Excluir conversa">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-slate-400">Nenhuma conversa ainda.</p>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Área principal do chat -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <div class="flex items-center gap-3 px-4 md:px-6 py-3 border-b border-slate-200 bg-white">
+            <button id="sidebar-toggle" class="md:hidden p-2 -ml-1 rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Abrir histórico e ferramentas">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <span class="relative w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-brand-800 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full"></span>
+            </span>
+            <div class="min-w-0">
+                <h1 class="text-sm font-bold text-slate-900 truncate">Assistente TalentMatch</h1>
+                <p class="text-xs text-slate-400 truncate">{% if view_only %}Visualizando conversa anterior{% else %}Online &bull; currículo, vagas e cursos{% endif %}</p>
+            </div>
+        </div>
+
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-slate-50/50">
+            {% for msg in chat_messages %}
             <div class="flex {% if msg.role == 'user' %}justify-end{% else %}justify-start{% endif %}">
-                <div class="max-w-[80%] px-4 py-3 text-sm leading-relaxed {% if msg.role == 'user' %}bg-brand-700 text-white rounded-2xl rounded-br-md{% else %}bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-bl-md shadow-sm{% endif %}">
+                <div class="max-w-[85%] md:max-w-[70%] px-4 py-3 text-sm leading-relaxed {% if msg.role == 'user' %}bg-brand-700 text-white rounded-2xl rounded-br-md{% else %}bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-bl-md shadow-sm{% endif %}">
                     <div class="whitespace-pre-wrap">{{ msg.content }}</div>
                 </div>
             </div>
             {% empty %}
-            <div class="text-center py-10" id="welcome-message">
-                <div class="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <div class="h-full flex flex-col items-center justify-center text-center px-4" id="welcome-message">
+                <div class="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center mb-5">
                     <svg class="w-8 h-8 text-brand-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                     </svg>
                 </div>
-                <p class="text-slate-600 font-medium mb-1">Olá! Como posso ajudar você hoje?</p>
-                <p class="text-slate-400 text-sm mb-5">Escolha uma sugestão ou digite sua pergunta</p>
+                <p class="text-slate-700 font-semibold mb-1">Olá! Como posso ajudar você hoje?</p>
+                <p class="text-slate-400 text-sm mb-6">Use as ferramentas na barra lateral ou digite sua pergunta</p>
                 <div class="flex flex-wrap justify-center gap-2">
                     <button onclick="sendQuickMessage('Analise meu curriculo')" class="px-4 py-2 bg-white border border-brand-200 text-brand-700 rounded-full text-sm font-medium hover:bg-brand-50 transition-colors">Analisar meu currículo</button>
                     <button onclick="sendQuickMessage('Mostre vagas para mim')" class="px-4 py-2 bg-white border border-brand-200 text-brand-700 rounded-full text-sm font-medium hover:bg-brand-50 transition-colors">Vagas recomendadas</button>
@@ -49,24 +119,23 @@
         </div>
 
         {% if not view_only %}
-        <div class="border-t border-slate-200 p-4 bg-white">
-            <form id="chat-form" class="flex gap-2">
+        <div class="border-t border-slate-200 p-3 md:p-4 bg-white">
+            <form id="chat-form" class="flex gap-2 max-w-3xl mx-auto">
                 {% csrf_token %}
-                <input type="text" id="message-input" placeholder="Digite sua mensagem..." class="input-field flex-grow" autocomplete="off" autofocus>
-                <button type="submit" id="send-btn" class="btn-primary shrink-0">
-                    <span id="send-btn-label">Enviar</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                <input type="text" id="message-input" placeholder="Digite sua mensagem..." class="input-field flex-grow !py-3" autocomplete="off" autofocus>
+                <button type="submit" id="send-btn" class="btn-primary shrink-0 !px-4" aria-label="Enviar mensagem">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                 </button>
             </form>
+            <p class="text-[11px] text-slate-300 text-center mt-2">A IA pode cometer erros. Confira informações importantes.</p>
         </div>
         {% else %}
         <div class="border-t border-slate-200 p-4 bg-slate-50 text-center">
-            <p class="text-slate-500 text-sm">Esta é uma sessão anterior. <a href="{% url 'chatbot:chat' %}" class="text-brand-700 font-semibold hover:underline">Iniciar nova conversa</a></p>
+            <p class="text-slate-500 text-sm">Esta é uma conversa anterior (somente leitura). <a href="{% url 'chatbot:chat' %}" class="text-brand-700 font-semibold hover:underline">Voltar à conversa ativa</a></p>
         </div>
         {% endif %}
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
@@ -75,8 +144,24 @@
     const chatForm = document.getElementById('chat-form');
     const messageInput = document.getElementById('message-input');
     const sendBtn = document.getElementById('send-btn');
-    const sendBtnLabel = document.getElementById('send-btn-label');
     const welcomeMessage = document.getElementById('welcome-message');
+
+    // Sidebar mobile
+    (function() {
+        const toggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('chat-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (!toggle) return;
+        function close() {
+            sidebar.classList.add('hidden');
+            backdrop.classList.add('hidden');
+        }
+        toggle.addEventListener('click', function() {
+            sidebar.classList.toggle('hidden');
+            backdrop.classList.toggle('hidden');
+        });
+        backdrop.addEventListener('click', close);
+    })();
 
     function getCookie(name) {
         let cookieValue = null;
@@ -108,11 +193,12 @@
         div.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
 
         const formattedContent = content
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\n/g, '<br>');
 
         div.innerHTML = `
-            <div class="max-w-[80%] px-4 py-3 text-sm leading-relaxed ${isUser ? 'bg-brand-700 text-white rounded-2xl rounded-br-md' : 'bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-bl-md shadow-sm'}">
+            <div class="max-w-[85%] md:max-w-[70%] px-4 py-3 text-sm leading-relaxed ${isUser ? 'bg-brand-700 text-white rounded-2xl rounded-br-md' : 'bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-bl-md shadow-sm'}">
                 <div class="whitespace-pre-wrap">${formattedContent}</div>
             </div>
         `;
@@ -125,7 +211,7 @@
         div.id = 'typing-indicator';
         div.className = 'flex justify-start';
         div.innerHTML = `
-            <div class="max-w-[80%] px-4 py-3 rounded-2xl rounded-bl-md bg-white border border-slate-200 shadow-sm">
+            <div class="px-4 py-3 rounded-2xl rounded-bl-md bg-white border border-slate-200 shadow-sm">
                 <div class="flex space-x-1.5">
                     <div class="w-2 h-2 bg-slate-300 rounded-full animate-bounce"></div>
                     <div class="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
@@ -149,10 +235,7 @@
 
         addMessage(message, true);
         if (messageInput) messageInput.value = '';
-        if (sendBtn) {
-            sendBtn.disabled = true;
-            if (sendBtnLabel) sendBtnLabel.textContent = 'Enviando...';
-        }
+        if (sendBtn) sendBtn.disabled = true;
 
         addTypingIndicator();
 
@@ -180,14 +263,16 @@
             addMessage('Desculpe, ocorreu um erro de conexão. Tente novamente.', false);
         }
 
-        if (sendBtn) {
-            sendBtn.disabled = false;
-            if (sendBtnLabel) sendBtnLabel.textContent = 'Enviar';
-        }
+        if (sendBtn) sendBtn.disabled = false;
+        if (messageInput) messageInput.focus();
     }
 
     function sendQuickMessage(message) {
+        {% if view_only %}
+        window.location.href = '{% url "chatbot:chat" %}';
+        {% else %}
         sendMessage(message);
+        {% endif %}
     }
 
     async function newSession() {
@@ -198,7 +283,7 @@
                     'X-CSRFToken': csrftoken
                 }
             });
-            location.reload();
+            window.location.href = '{% url "chatbot:chat" %}';
         } catch (error) {
             console.error('Error creating new session');
         }
