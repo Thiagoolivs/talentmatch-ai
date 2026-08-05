@@ -101,6 +101,10 @@ class EmailVerificationMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        from django.conf import settings
+        if not getattr(settings, 'EMAIL_VERIFICATION_ENABLED', False):
+            return self.get_response(request)
+
         user = request.user
         if (
             user.is_authenticated

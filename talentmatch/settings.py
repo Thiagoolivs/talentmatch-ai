@@ -213,6 +213,10 @@ else:
 
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@talentmatch.com')
 
+# Verificação de email por código. Desativada por padrão ("por enquanto");
+# reative em produção com EMAIL_VERIFICATION_ENABLED=True no ambiente.
+EMAIL_VERIFICATION_ENABLED = os.environ.get('EMAIL_VERIFICATION_ENABLED', 'False').lower() in ('true', '1', 'yes')
+
 # -------------------------------------------
 # 🔎 DJANGO REST FRAMEWORK
 # -------------------------------------------
