@@ -8,6 +8,7 @@ from django.contrib.auth.views import (
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db import transaction
+from django.conf import settings
 import logging
 
 from .forms import (CandidateRegistrationForm, CompanyRegistrationForm, 
@@ -34,10 +35,13 @@ def register_candidate(request):
                 with transaction.atomic():
                     user = form.save()
                     login(request, user)
-                from .verification import send_verification_code
-                send_verification_code(user, force=True)
-                messages.success(request, 'Conta criada! Enviamos um código de verificação para o seu email.')
-                return redirect('accounts:verify_email')
+                if settings.EMAIL_VERIFICATION_ENABLED:
+                    from .verification import send_verification_code
+                    send_verification_code(user, force=True)
+                    messages.success(request, 'Conta criada! Enviamos um código de verificação para o seu email.')
+                    return redirect('accounts:verify_email')
+                messages.success(request, 'Conta criada com sucesso! Bem-vindo(a).')
+                return redirect('dashboard:index')
             except Exception as e:
                 logger.error(f"Erro ao registrar candidato: {e}")
                 messages.error(request, 'Ocorreu um erro ao criar sua conta. Tente novamente.')
@@ -64,10 +68,13 @@ def register_company(request):
                 with transaction.atomic():
                     user = form.save()
                     login(request, user)
-                from .verification import send_verification_code
-                send_verification_code(user, force=True)
-                messages.success(request, 'Conta da empresa criada! Enviamos um código de verificação para o seu email.')
-                return redirect('accounts:verify_email')
+                if settings.EMAIL_VERIFICATION_ENABLED:
+                    from .verification import send_verification_code
+                    send_verification_code(user, force=True)
+                    messages.success(request, 'Conta da empresa criada! Enviamos um código de verificação para o seu email.')
+                    return redirect('accounts:verify_email')
+                messages.success(request, 'Conta da empresa criada com sucesso! Bem-vindo(a).')
+                return redirect('dashboard:index')
             except Exception as e:
                 logger.error(f"Erro ao registrar empresa: {e}")
                 messages.error(request, 'Ocorreu um erro ao criar sua conta. Tente novamente.')
@@ -157,7 +164,7 @@ def profile(request):
                         user_form.save()
                         saved_profile = profile_form.save()
                         logger.info(f"Perfil salvo - User: {user.username}, City: {saved_profile.city}, State: {saved_profile.state}, Bio: {len(saved_profile.bio or '')} chars")
-                    if user.email != old_email:
+                    if settings.EMAIL_VERIFICATION_ENABLED and user.email != old_email:
                         return _require_email_reverification(request, user)
                     messages.success(request, 'Perfil atualizado com sucesso!')
                     return redirect('accounts:profile')
@@ -211,7 +218,7 @@ def profile(request):
                         user_form.save()
                         profile_form.save()
                         logger.info(f"Perfil da empresa {profile_obj.company_name} salvo com sucesso")
-                    if user.email != old_email:
+                    if settings.EMAIL_VERIFICATION_ENABLED and user.email != old_email:
                         return _require_email_reverification(request, user)
                     messages.success(request, 'Perfil da empresa atualizado com sucesso!')
                     return redirect('accounts:profile')
@@ -340,6 +347,8 @@ def _require_email_reverification(request, user):
 
 @login_required
 def verify_email(request):
+    if not settings.EMAIL_VERIFICATION_ENABLED:
+        return redirect('dashboard:index')
     from .verification import send_verification_code, verify_code
 
     user = request.user
