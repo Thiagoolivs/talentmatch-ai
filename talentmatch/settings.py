@@ -25,6 +25,18 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
 ]
 
+# O Railway injeta o domínio público real (gerado OU customizado) nesta variável.
+# Adicioná-lo explicitamente evita erro de CSRF quando o curinga não cobre o host.
+_railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if _railway_domain:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{_railway_domain}')
+
+# Domínios extras (ex.: domínio próprio) via env, separados por vírgula.
+for _origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(','):
+    _origin = _origin.strip()
+    if _origin and _origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(_origin)
+
 # Railway usa proxy HTTPS — obrigatório
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
